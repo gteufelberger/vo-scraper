@@ -50,14 +50,14 @@ The file should have a link on each new line. It should look something like this
 #### A: For Firefox
 
 1. Go to the lecture's page with your browser
-2. Log in with your NETHZ acccount
+2. Log in with your NETHZ account
 3. Open the dev tools by pressing `F12`
 4. Inside the dev tools go to the tab called *Storage*
 5. Select *Cookies*
 6. Select the cookie called *login-token*
 7. On the right side under *Data* right click on `login-token:"login%3a......%3acrx.default"` and click on *copy*.
 
-![video showing how to get the login-token from firefox](how_to_get_token.mp4)
+![(Video showing how to get the login-token from Firefox)](how_to_get_token.mp4)
 
 #### A: For Chrome-based browsers:
 Probably similar but you'll have to figure it out yourself.
@@ -119,4 +119,4 @@ So what the vo-scraper does is getting the list of episodes from the lecture's m
 
 ***
 
-Losely based on https://gitlab.ethz.ch/dominik/infk-vorlesungsscraper
+Loosely based on https://gitlab.ethz.ch/dominik/infk-vorlesungsscraper
