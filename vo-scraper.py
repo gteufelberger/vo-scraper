@@ -57,7 +57,7 @@ video_info_prefix = "https://video.ethz.ch/.episode-video.json?recordId="
 directory_prefix = "Lecture Recordings/"
 
 #TODO link gitlab issue page
-gitlab_issue_page = "https://example.com#TODO"
+gitlab_issue_page = "https://gitlab.ethz.ch/tgeorg/vo-scraper/issues"
 
 video_quality = "high"
 
