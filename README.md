@@ -57,9 +57,9 @@ The file should have a link on each new line. It should look something like this
 6. Select the cookie called *login-token*
 7. On the right side under *Data* right click on `login-token:"login%3a......%3acrx.default"` and click on *copy*.
 
-TODO: Add GIF
+![video showing how to get the login-token from firefox](how_to_get_token.mp4)
 
-#### A: For Chrome-based browser:
+#### A: For Chrome-based browsers:
 Probably similar but you'll have to figure it out yourself.
 
 **NOTE: The login-token is only valid for a certain period of time. You'll have to acquire a new one each time you haven't used the scraper for a while (about half a day)!**
