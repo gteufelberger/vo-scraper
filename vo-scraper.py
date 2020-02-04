@@ -228,6 +228,8 @@ def downloader(file_name, video_src_link):
     """Downloads the video and gives progress information"""
     global download_counter
     global skip_counter
+
+    print_information("Video source: " + video_src_link, verbose_only=True)
     
     # check if file already exists
     if os.path.isfile(file_name):
