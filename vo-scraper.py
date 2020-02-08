@@ -201,7 +201,7 @@ def vo_scrapper(vo_link):
         video_json_data = json.loads(r.text)
 
         
-        # put available versions in list for sorting by dimensions
+        # put available versions in list for sorting by video quality
         counter = 0
         versions = list()
         print_information("Available versions:", verbose_only=True)
