@@ -96,7 +96,7 @@ print_type_dict = {
 def print_information(str, type='info', verbose_only=False):
     """Print provided string.
     
-    Keyword argumnts:
+    Keyword arguments:
     type         -- The type of information: {info, warning, error}
     verbose_only -- If true the string will only be printed when the verbose flag is set.
                     Useful for printing debugging info.
@@ -278,7 +278,7 @@ def downloader(file_name, video_src_link):
         download_counter += 1
 
 def check_connection():
-    """Checks connection to video.ethz.ch and if it fails, then also to the internet"""
+    """Checks connection to video.ethz.ch and if it fails then also to the internet"""
     try:
         print_information("Checking connection to video.ethz.ch", verbose_only=True)
         req = Request('https://video.ethz.ch/', headers={'User-Agent': 'Mozilla/5.0'})
