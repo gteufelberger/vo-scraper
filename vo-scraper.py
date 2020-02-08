@@ -64,6 +64,9 @@ video_quality = "high"
 download_all = False
 verbose = False
 
+print_src = False
+file_to_print_src_to = ""
+
 quality_dict = {
     'low'   : 0,
     'medium': 1,
@@ -125,6 +128,9 @@ def vo_scrapper(vo_link):
     global video_quality
     global quality_dict
     global login_token
+
+    global print_src
+    global file_to_print_src_to
 
     global series_metadata_suffix
     global video_info_prefix
@@ -221,8 +227,18 @@ def vo_scrapper(vo_link):
         # filename is `directory/<video date (YYYY-MM-DD)>-<quality>.mp4`
         file_name = directory+item['createdAt'][:-6]+"-"+video_quality+".mp4"
 
-        # download video
-        downloader(file_name, video_src_link)
+        # check for print_src flag
+        if print_src:
+            # print to file if given
+            if file_to_print_src_to:
+                print_information("Printing " + video_src_link + "to file: "+ file_to_print_src_to, verbose_only=True)
+                with open(file_to_print_src_to,"a") as f:
+                    f.write(video_src_link+"\n")
+            else:
+                print_information(video_src_link)
+        # otherwise download video
+        else:
+            downloader(file_name, video_src_link)
 
 def downloader(file_name, video_src_link):
     """Downloads the video and gives progress information"""
@@ -292,6 +308,8 @@ def apply_args(args):
     global video_quality
     global login_token
 
+    global print_src
+
     #enable verbose for debugging
     verbose = args.verbose
     print_information("Verbose enabled", verbose_only=True)
@@ -312,6 +330,11 @@ def apply_args(args):
     video_quality = args.quality
 
     login_token = args.login_token
+
+    # check for printing flag
+    if hasattr(args, 'print_src'):
+        print_src=True
+
 
     # Remove login-token prefix if necessary
     if login_token:
@@ -346,6 +369,13 @@ def setup_arg_parser():
     parser.add_argument(
         "-l", "--login-token",
         help="Your login token to download lectures that require a valid NETHZ login. See README.md on how to acquire it."
+    )
+    parser.add_argument(
+        "-p", "--print-src",
+        metavar="FILE",
+        nargs="?",
+        default=argparse.SUPPRESS,
+        help="Prints the source link for each video but doesn't download it. Follow with filename to print to that file instead. Useful if you want to use your own tool to download the video."
     )
     parser.add_argument(
         "-q", "--quality",
@@ -384,6 +414,10 @@ if not args.skip_connection_check:
     check_connection()
 else:
     print_information("Connection check skipped.", verbose_only=True)
+
+# Store where to print video source
+if print_src and args.print_src:
+    file_to_print_src_to = args.print_src
 
 # Collect lecture links
 links = list()
