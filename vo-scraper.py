@@ -21,6 +21,7 @@ from urllib.request import Request, urlopen
 from sys import platform
 import json     # For handling json files
 import argparse # For parsing commandline arguments
+import getpass  # For getting the user password
 
 
 # check whether `requests` is installed
@@ -113,7 +114,50 @@ def print_information(str, type='info', verbose_only=False):
     elif verbose:
         # Always print with tag
         print(print_type_dict[type],str)
+
+def get_credentials():
+    """Gets user credentials and returns them"""
+    user  = input("Enter your username: ")
+    passw = getpass.getpass()
     
+    return(user, passw)
+
+def acquire_login_token(protection):
+    """Gets login-token by sending user credentials to login server"""
+    global user_agent
+
+    print_information("This lecture requires a login and no login-token was found")
+    
+    while True:
+        (user, passw) = get_credentials()
+
+        # setup headers and content to send
+        headers = { "Content-Type": "application/x-www-form-urlencoded", "CSRF-Token": "undefined", 'User-Agent': user_agent}
+        if protection == "ETH":
+            data = { "__charset__": "utf-8", "j_validate": True, "j_username": user, "j_password": passw}
+        else:
+            data = { "__charset__": "utf-8", "username": user, "password": passw }
+
+        # request login-token
+        r = requests.post("https://video.ethz.ch/j_security_check", headers=headers, data=data)
+
+        # turn cookie jar into dict for processing
+        cookie_dict = requests.utils.dict_from_cookiejar(r.cookies)
+
+        # check for token presence
+        if "login-token" in cookie_dict:
+            break
+        else:
+            print_information("Wrong username or password, please try again", type='warning')
+        
+    # set login-token from cookie
+    login_token = cookie_dict["login-token"]
+    
+    print_information("Acquired login-token:", verbose_only=True)
+    print_information(login_token, verbose_only=True)
+    
+    return login_token
+
 def vo_scrapper(vo_link):
     """
     Gets the list of all available videos for a lecture.
@@ -165,18 +209,31 @@ def vo_scrapper(vo_link):
                 "Enter numbers of the above lectures you want to download separated by space (e.g. 0 5 12 14)\nJust press enter if you don't want to download anything from this lecture\n"
             ).split()]
         except:
+            print()
             print_information("Exiting...")
             sys.exit()
     
     # print the user's choice
     if not choice:
         print_information("No videos selected")
+        return # nothing to do anymore
     else:
         print_information("You selected:")
         for item_nr in choice:
             item = vo_json_data['episodes'][item_nr]
-            print_information("%2d" % item_nr + " " + item['title'] + " " + str(item['createdBy']) + " " + item['createdAt'][:-6])
+            print_information(" - %2d" % item_nr + " " + item['title'] + " " + str(item['createdBy']) + " " + item['createdAt'][:-6])
+    print()
 
+    # check whether lecture requires login and get credentials if necessary
+    print_information("Protection: " + vo_json_data["protection"], verbose_only=True)
+    if vo_json_data["protection"] != "NONE" and not login_token:
+        try:
+            login_token = acquire_login_token(vo_json_data["protection"])
+        except KeyboardInterrupt:
+            print()
+            print_information("Keyboard interrupt detected, skipping lecture", type='warning')
+            return
+        
     # collect links and download them
     for item_nr in choice:
         # get link to video metadata json file
@@ -195,7 +252,7 @@ def vo_scrapper(vo_link):
             print_information("Received 401 response. The following lecture requires a valid login token:", type='error')
             item = vo_json_data['episodes'][item_nr]
             print_information("%2d" % item_nr + " " + item['title'] + " " + str(item['createdBy']) + " " + item['createdAt'][:-6], type='error')
-            print_information("See README.md on how to acquire it.", type='error')
+            print_information("Make sure your token is valid. See README.md on how to acquire it.", type='error')
             print()
             continue
         video_json_data = json.loads(r.text)
@@ -340,7 +397,7 @@ def apply_args(args):
         token_prefix="login-token:"
         if login_token.startswith(token_prefix):
             login_token =login_token[len(token_prefix):]
-        print_information("Your login-token: " + login_token)
+        print_information("Your login-token: " + login_token, verbose_only=True)
 
 def setup_arg_parser():
     """Sets the parser up"""
