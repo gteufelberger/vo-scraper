@@ -46,7 +46,6 @@ except:
 # ========================================================================
 
 user_agent = 'Mozilla/5.0'
-login_token = ""
 cookie_jar = requests.cookies.RequestsCookieJar()
 
 #for stats
@@ -124,7 +123,7 @@ def get_credentials():
     return(user, passw)
 
 def acquire_login_cookie(protection, vo_link):
-    """Gets login-token by sending user credentials to login server"""
+    """Gets login-cookie by sending user credentials to login server"""
     global user_agent
 
     # setup cookie_jar    
@@ -139,7 +138,7 @@ def acquire_login_cookie(protection, vo_link):
             headers = { "Content-Type": "application/x-www-form-urlencoded", "CSRF-Token": "undefined", 'User-Agent': user_agent}
             data = { "__charset__": "utf-8", "j_validate": True, "j_username": user, "j_password": passw}
             
-            # request login-token
+            # request login-cookie
             r = requests.post("https://video.ethz.ch/j_security_check", headers=headers, data=data)
 
             # put login cookie in cookie_jar
@@ -191,7 +190,6 @@ def vo_scrapper(vo_link):
 
     global video_quality
     global quality_dict
-    global login_token
     global cookie_jar
 
     global print_src
@@ -261,7 +259,7 @@ def vo_scrapper(vo_link):
         video_info_link = video_info_prefix+item['id']
         
         # download the video metadata file
-        # use login-token if provided otherwise make request without cookie
+        # use login-cookie if provided otherwise make request without cookie
         if(cookie_jar):
             r = requests.get(video_info_link, cookies=cookie_jar, headers={'User-Agent': user_agent})
         else:
@@ -385,14 +383,12 @@ def apply_args(args):
      - bug
      - all
      - quality
-     - login-token
     """
 
     global verbose 
     global download_all
     global video_quality
-    global login_token
-
+    
     global print_src
 
     #enable verbose for debugging
@@ -408,19 +404,9 @@ def apply_args(args):
     download_all = args.all
     video_quality = args.quality
 
-    login_token = args.login_token
-
     # check for printing flag
     if hasattr(args, 'print_src'):
         print_src=True
-
-
-    # Remove login-token prefix if necessary
-    if login_token:
-        token_prefix="login-token:"
-        if login_token.startswith(token_prefix):
-            login_token =login_token[len(token_prefix):]
-        print_information("Your login-token: " + login_token, verbose_only=True)
 
 def setup_arg_parser():
     """Sets the parser up"""
@@ -444,10 +430,6 @@ def setup_arg_parser():
     parser.add_argument(
         "-f", "--file",
         help="A file with links to all the lectures you want to download. Each lecture link should be on a new line. See README.md for details."
-    )
-    parser.add_argument(
-        "-l", "--login-token",
-        help="Your login token to download lectures that require a valid NETHZ login. See README.md on how to acquire it."
     )
     parser.add_argument(
         "-p", "--print-src",
