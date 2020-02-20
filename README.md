@@ -44,26 +44,6 @@ The file should have a link on each new line. It should look something like this
     https://video.ethz.ch/lectures/d-infk/<year>/<spring/autumn>/XXX-XXXX-XXL.html
     ...
 
-
-### Q: How do I acquire the login-token for lectures that require a valid login?
-
-#### A: For Firefox
-
-1. Go to the lecture's page with your browser
-2. Log in with your NETHZ account
-3. Open the dev tools by pressing `F12`
-4. Inside the dev tools go to the tab called *Storage*
-5. Select *Cookies*
-6. Select the cookie called *login-token*
-7. On the right side under *Data* right click on `login-token:"login%3a......%3acrx.default"` and click on *copy*.
-
-![(Video showing how to get the login-token from Firefox)](how_to_get_token.mp4)
-
-#### A: For Chrome-based browsers:
-Probably similar but you'll have to figure it out yourself.
-
-**NOTE: The login-token is only valid for a certain period of time. You'll have to acquire a new one each time you haven't used the scraper for a while (about half a day)!**
-
 ### <a name="how_it_works"></a> Q: How does it work?
 
 #### A: Like so:

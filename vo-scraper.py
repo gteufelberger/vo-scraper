@@ -46,7 +46,7 @@ except:
 # ========================================================================
 
 user_agent = 'Mozilla/5.0'
-login_token = ""
+cookie_jar = requests.cookies.RequestsCookieJar()
 
 #for stats
 link_counter = 0
@@ -122,41 +122,61 @@ def get_credentials():
     
     return(user, passw)
 
-def acquire_login_token(protection):
-    """Gets login-token by sending user credentials to login server"""
+def acquire_login_cookie(protection, vo_link):
+    """Gets login-cookie by sending user credentials to login server"""
     global user_agent
 
-    print_information("This lecture requires a login and no login-token was found")
-    
-    while True:
-        (user, passw) = get_credentials()
+    # setup cookie_jar    
+    cookie_jar = requests.cookies.RequestsCookieJar()
 
-        # setup headers and content to send
-        headers = { "Content-Type": "application/x-www-form-urlencoded", "CSRF-Token": "undefined", 'User-Agent': user_agent}
-        if protection == "ETH":
+    if protection == "ETH":
+        print_information("This lecture requires a NETHZ login")
+        while True:
+            (user, passw) = get_credentials()
+            
+            # setup headers and content to send
+            headers = { "Content-Type": "application/x-www-form-urlencoded", "CSRF-Token": "undefined", 'User-Agent': user_agent}
             data = { "__charset__": "utf-8", "j_validate": True, "j_username": user, "j_password": passw}
-        else:
+            
+            # request login-cookie
+            r = requests.post("https://video.ethz.ch/j_security_check", headers=headers, data=data)
+
+            # put login cookie in cookie_jar
+            cookie_jar = r.cookies
+            if cookie_jar:
+                break
+            else:
+                print_information("Wrong username or password, please try again", type='warning')
+    
+    elif protection == "PWD":
+        print_information("This lecture requires a CUSTOM login. Check lecture website or your emails for the credentials")
+        
+        while True:
+            (user, passw) = get_credentials()
+
+            # setup headers and content to send
+            headers = {"Referer": vo_link+".html", "User-Agent":user_agent}
             data = { "__charset__": "utf-8", "username": user, "password": passw }
 
-        # request login-token
-        r = requests.post("https://video.ethz.ch/j_security_check", headers=headers, data=data)
-
-        # turn cookie jar into dict for processing
-        cookie_dict = requests.utils.dict_from_cookiejar(r.cookies)
-
-        # check for token presence
-        if "login-token" in cookie_dict:
-            break
-        else:
-            print_information("Wrong username or password, please try again", type='warning')
+            # get login cookie
+            r = requests.post(vo_link+".series-login.json", headers=headers, data=data)
+            
+            # put login cookie in cookie_jar
+            cookie_jar = r.cookies
+            if cookie_jar:
+                break
+            else:
+                print_information("Wrong username or password, please try again", type='warning')
         
-    # set login-token from cookie
-    login_token = cookie_dict["login-token"]
+    else:
+        print_information("Unknown protection type: " + protection, type='error') 
+        print_information("Please report this to the project's GitLab issue page!", type='error')
+        report_bug()
+
+    print_information("Acquired cookie:", verbose_only=True)
+    print_information(cookie_jar, verbose_only=True)
     
-    print_information("Acquired login-token:", verbose_only=True)
-    print_information(login_token, verbose_only=True)
-    
-    return login_token
+    return cookie_jar
 
 def vo_scrapper(vo_link):
     """
@@ -170,7 +190,7 @@ def vo_scrapper(vo_link):
 
     global video_quality
     global quality_dict
-    global login_token
+    global cookie_jar
 
     global print_src
     global file_to_print_src_to
@@ -182,11 +202,9 @@ def vo_scrapper(vo_link):
     # remove `.html` file extension
     if vo_link.endswith('.html'):
         vo_link = vo_link[:-5]
-    # and add suffix
-    vo_link = vo_link + series_metadata_suffix
 
     # get lecture metadata for episode list
-    r = requests.get(vo_link, headers={'User-Agent': user_agent})
+    r = requests.get(vo_link + series_metadata_suffix, headers={'User-Agent': user_agent})
     vo_json_data = json.loads(r.text)
 
     # print available episode
@@ -226,9 +244,9 @@ def vo_scrapper(vo_link):
 
     # check whether lecture requires login and get credentials if necessary
     print_information("Protection: " + vo_json_data["protection"], verbose_only=True)
-    if vo_json_data["protection"] != "NONE" and not login_token:
+    if vo_json_data["protection"] != "NONE":
         try:
-            login_token = acquire_login_token(vo_json_data["protection"])
+            cookie_jar.update(acquire_login_cookie(vo_json_data["protection"], vo_link))
         except KeyboardInterrupt:
             print()
             print_information("Keyboard interrupt detected, skipping lecture", type='warning')
@@ -241,15 +259,14 @@ def vo_scrapper(vo_link):
         video_info_link = video_info_prefix+item['id']
         
         # download the video metadata file
-        # use login-token if provided otherwise make request without cookie
-        if(login_token):
-            cookies = requests.utils.cookiejar_from_dict({"login-token" : login_token})
-            r = requests.get(video_info_link, cookies=cookies, headers={'User-Agent': user_agent})
+        # use login-cookie if provided otherwise make request without cookie
+        if(cookie_jar):
+            r = requests.get(video_info_link, cookies=cookie_jar, headers={'User-Agent': user_agent})
         else:
             r = requests.get(video_info_link, headers={'User-Agent': user_agent})
         if(r.status_code == 401):
             # the lecture requires a login
-            print_information("Received 401 response. The following lecture requires a valid login token:", type='error')
+            print_information("Received 401 response. The following lecture requires a valid login cookie:", type='error')
             item = vo_json_data['episodes'][item_nr]
             print_information("%2d" % item_nr + " " + item['title'] + " " + str(item['createdBy']) + " " + item['createdAt'][:-6], type='error')
             print_information("Make sure your token is valid. See README.md on how to acquire it.", type='error')
@@ -272,17 +289,27 @@ def vo_scrapper(vo_link):
         # get video src url from json
         video_src_link = video_json_data['streams'][0]['sources']['mp4'][versions[quality_dict[video_quality]][0]]['src']
 
+        lecture_titel = vo_json_data['title']
+        video_title   = vo_json_data["episodes"][item_nr]["title"]
+        
+        # if video and lecture title overlap, remove lecture title from video title
+        if video_title.startswith(lecture_titel):
+            video_title = video_title[len(lecture_titel):]
+        # append date
+        video_title = item['createdAt'][:-6]+video_title
+
         # create directory for video if it does not already exist
-        directory = directory_prefix + vo_json_data['title'] +"/"
+        directory = directory_prefix + lecture_titel +"/"
         if not os.path.isdir(directory):
             os.makedirs(directory)
             print_information("This folder was generated: " + directory, verbose_only=True)
         else:
-            print_information("This folder already exists: " + directory, verbose_only=True)
+            print_information("This folder already exists: " + directory, verbose_only=True)        
         
-        # filename is `directory/<video date (YYYY-MM-DD)>-<quality>.mp4`
-        file_name = directory+item['createdAt'][:-6]+"-"+video_quality+".mp4"
-
+        # filename is `directory/<video date (YYYY-MM-DD)><leftovers from video title>-<quality>.mp4`
+        file_name = directory+video_title+"_"+video_quality+".mp4"
+        print_information(file_name, verbose_only=True)
+        
         # check for print_src flag
         if print_src:
             # print to file if given
@@ -349,6 +376,16 @@ def check_connection():
             print_information("There seems to be no internet connection - please connect to the internet and try again.", type='error')
         sys.exit(1)
 
+def report_bug():
+    print_information(gitlab_issue_page)
+    try:
+        input("Press enter to open the link in your browser or Ctrl+C to exit.")
+        webbrowser.open(gitlab_issue_page)
+    except:
+        print()
+    print_information("Exiting...")
+    sys.exit(0)
+
 def apply_args(args):
     """Applies the provided command line arguments
     The following are handled here:
@@ -356,14 +393,12 @@ def apply_args(args):
      - bug
      - all
      - quality
-     - login-token
     """
 
     global verbose 
     global download_all
     global video_quality
-    global login_token
-
+    
     global print_src
 
     #enable verbose for debugging
@@ -372,32 +407,16 @@ def apply_args(args):
 
     # Check if user wants to submit bug report and exit
     if(args.bug == True):
-        print_information("If you found a bug you can raise an issue here: " + gitlab_issue_page)
-        try:
-            input("Press enter to open the link in your browser or Ctrl+C to exit.")
-            webbrowser.open(gitlab_issue_page)
-        except:
-            print()
-        print_information("Exiting...")
-        sys.exit(0)
+        print_information("If you found a bug you can raise an issue here: ")
+        report_bug()
     
     # set global variable according to input
     download_all = args.all
     video_quality = args.quality
 
-    login_token = args.login_token
-
     # check for printing flag
     if hasattr(args, 'print_src'):
         print_src=True
-
-
-    # Remove login-token prefix if necessary
-    if login_token:
-        token_prefix="login-token:"
-        if login_token.startswith(token_prefix):
-            login_token =login_token[len(token_prefix):]
-        print_information("Your login-token: " + login_token, verbose_only=True)
 
 def setup_arg_parser():
     """Sets the parser up"""
@@ -421,10 +440,6 @@ def setup_arg_parser():
     parser.add_argument(
         "-f", "--file",
         help="A file with links to all the lectures you want to download. Each lecture link should be on a new line. See README.md for details."
-    )
-    parser.add_argument(
-        "-l", "--login-token",
-        help="Your login token to download lectures that require a valid NETHZ login. See README.md on how to acquire it."
     )
     parser.add_argument(
         "-p", "--print-src",
