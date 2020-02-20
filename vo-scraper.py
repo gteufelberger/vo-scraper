@@ -289,17 +289,27 @@ def vo_scrapper(vo_link):
         # get video src url from json
         video_src_link = video_json_data['streams'][0]['sources']['mp4'][versions[quality_dict[video_quality]][0]]['src']
 
+        lecture_titel = vo_json_data['title']
+        video_title   = vo_json_data["episodes"][item_nr]["title"]
+        
+        # if video and lecture title overlap, remove lecture title from video title
+        if video_title.startswith(lecture_titel):
+            video_title = video_title[len(lecture_titel):]
+        # append date
+        video_title = item['createdAt'][:-6]+video_title
+
         # create directory for video if it does not already exist
-        directory = directory_prefix + vo_json_data['title'] +"/"
+        directory = directory_prefix + lecture_titel +"/"
         if not os.path.isdir(directory):
             os.makedirs(directory)
             print_information("This folder was generated: " + directory, verbose_only=True)
         else:
-            print_information("This folder already exists: " + directory, verbose_only=True)
+            print_information("This folder already exists: " + directory, verbose_only=True)        
         
-        # filename is `directory/<video date (YYYY-MM-DD)>-<quality>.mp4`
-        file_name = directory+item['createdAt'][:-6]+"-"+video_quality+".mp4"
-
+        # filename is `directory/<video date (YYYY-MM-DD)><leftovers from video title>-<quality>.mp4`
+        file_name = directory+video_title+"_"+video_quality+".mp4"
+        print_information(file_name, verbose_only=True)
+        
         # check for print_src flag
         if print_src:
             # print to file if given
