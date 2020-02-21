@@ -149,7 +149,7 @@ def acquire_login_cookie(protection, vo_link):
                 print_information("Wrong username or password, please try again", type='warning')
     
     elif protection == "PWD":
-        print_information("This lecture requires a CUSTOM login. Check lecture website or your emails for the credentials")
+        print_information("This lecture requires a CUSTOM login. Check the lecture's website or your emails for the credentials.")
         
         while True:
             (user, passw) = get_credentials()
