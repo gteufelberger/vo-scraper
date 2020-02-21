@@ -40,8 +40,8 @@ or
 
 The file should have a link on each new line. It should look something like this:
 
-    https://video.ethz.ch/lectures/d-infk/<year>/<spring/autumn>/XXX-XXXX-XXL.html
-    https://video.ethz.ch/lectures/d-infk/<year>/<spring/autumn>/XXX-XXXX-XXL.html
+    https://video.ethz.ch/lectures/<department>/<year>/<spring/autumn>/XXX-XXXX-XXL.html
+    https://video.ethz.ch/lectures/<department>/<year>/<spring/autumn>/XXX-XXXX-XXL.html
     ...
 
 ### <a name="how_it_works"></a> Q: How does it work?
