@@ -90,7 +90,7 @@ So what the vo-scraper does is getting the list of episodes from the lecture's m
 #### A: Follow these steps:
 1. Make sure you have connection to [video.ethz.ch](https://video.ethz.ch/). The scraper should let you know when there's no connection.
 2. Try running it again. Sometimes random issues can throw it off.
-3. Make sure that you haven't just forgotten to add a login-token on a lecture that requires a valid login. Also make sure the token is still up to date.
+3. If the lecture is password protected, make sure you use the correct credentials. Most protected lectures require your NETHZ credentials while some use a custom username and password.
 4. Check whether other lectures still work. Maybe the site was updated which broke the scraper.
 5. Enable the debug flag with `-v` and see whether any of the additional information now provided is helpful.
 6. Check "[How does it work?](#how_it_works)" and see whether you can manually reach the video in your browser following the steps described there.
