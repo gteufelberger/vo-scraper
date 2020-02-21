@@ -31,6 +31,10 @@ or
 
 #### A:
 
+    python3 vo-scraper.py <arguments> <lecture link(s)>
+
+To see a list of possible arguments check
+
     python3 vo-scraper.py --help
 
 
