@@ -475,9 +475,16 @@ def setup_arg_parser():
 #
 # ===============================================================
 
-# Setup parser and apply commands from input
+# Setup parser
 parser = setup_arg_parser()
 args = parser.parse_args()
+
+# Print help and exit if no arguments were passed
+if len(sys.argv) == 1:
+    parser.print_help()
+    sys.exit()
+
+# Apply commands from input
 apply_args(args)
 
 # Connection check
