@@ -84,6 +84,57 @@ Example:
 
 So what the vo-scraper does is getting the list of episodes from the lecture's metadata and then acquiring the links to the videos selected by the user by accessing the videos' JSON files. Afterwards it downloads the videos behind the links.
 
+### Q: How does it handle lectures that are password protected?
+
+#### A: Like so:
+
+There exist three (known) types of protection for lecture videos:
+
+* `NONE` requires no login at all
+
+* `ETH` requires logging in with a NETHZ account
+
+* `PWD` requires logging in with a custom user name and password
+
+What kind of protection a series of lecture videos has, can be found in its metadata file under `<lecture link>.series-metadata.json`, e.g.
+
+    https://video.ethz.ch/lectures/d-infk/2019/spring/252-0028-00L.series-metadata.json
+
+This JSON file has a field called `protection` with a value corresponding to one of the three protection types.
+
+If the series is protected then a cookie containing an authentication token needs to be sent when requesting the individual videos' metadata file at `https://video.ethz.ch/.episode-video.json?recordId=<ID>`
+
+Getting a cookie with a valid token differs between videos that require a NETHZ login and videos that use custom credentials.
+
+For NETHZ logins we need to send a POST request to `https://video.ethz.ch/j_security_check` with the following headers:
+
+    Content-Type: application/x-www-form-urlencoded
+    CSRF-Token: undefined
+    User-Agent: Mozilla/5.0
+
+as well as the following parametres:
+
+    __charset__: utf-8
+    j_validate: True
+    j_username: <NETHZ username>
+    j_password: <NETHZ password>
+
+For logins with custom credentials we have to perforn a POST request to `<lecture link>.series-login.json`, e.g.:
+
+    https://video.ethz.ch/lectures/d-infk/2020/spring/252-0220-00L.series-login.json
+
+with the following headers:
+
+    Referer: <lecture link>.html
+    User-Agent: Mozilla/5.0
+            
+as well as the following parametres:
+
+    __charset__: utf-8
+    username: <custom username>
+    password: <custom password>
+
+In both cases we get back a cookie which we then can include when requesting the individual video metdata files.
 
 ### Q: It doesn't work for my lecture. What can I do to fix it?
 
