@@ -10,20 +10,9 @@ Install with:
     pip3 install requests
 
 ## Setup
-Download the file
-
-    git clone https://gitlab.ethz.ch/tgeorg/vo-scraper.git
-
-and run with
+Download the file [here](https://gitlab.ethz.ch/tgeorg/vo-scraper/raw/master/vo-scraper.py?inline=false) and run with
 
     python3 vo-scraper.py
-
-or
-
-    chmod +x vo-scraper.py
-    ./vo-scraper.py
-
-
 
 # FAQ
 
