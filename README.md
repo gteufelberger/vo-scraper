@@ -26,6 +26,7 @@ To see a list of possible arguments check
 
     python3 vo-scraper.py --help
 
+**For protected lectures** the vo-scraper will ask for your login credentials before downloading the video(s).
 
 ### Q: How do I pass a file with links to multiple lectures?
 
@@ -37,7 +38,7 @@ The file should have a link on each new line. It should look something like this
     https://video.ethz.ch/lectures/<department>/<year>/<spring/autumn>/XXX-XXXX-XXL.html
     ...
 
-### <a name="how_it_works"></a> Q: How does it work?
+### <a name="how_it_works"></a> Q: How does it acquire the videos?
 
 #### A: Like so:
 
@@ -73,7 +74,7 @@ Example:
 
 So what the vo-scraper does is getting the list of episodes from the lecture's metadata and then acquiring the links to the videos selected by the user by accessing the videos' JSON files. Afterwards it downloads the videos behind the links.
 
-### Q: How does it handle lectures that are password protected?
+### Q: How does it access lecture videos that are password protected?
 
 #### A: Like so:
 
@@ -133,7 +134,7 @@ In both cases we get back a cookie which we then can include when requesting the
 3. If the lecture is password protected, make sure you use the correct credentials. Most protected lectures require your NETHZ credentials while some use a custom username and password.
 4. Check whether other lectures still work. Maybe the site was updated which broke the scraper.
 5. Enable the debug flag with `-v` and see whether any of the additional information now provided is helpful.
-6. Check "[How does it work?](#how_it_works)" and see whether you can manually reach the video in your browser following the steps described there.
+6. Check "[How does it acquire the videos?](#how_it_works)" and see whether you can manually reach the video in your browser following the steps described there.
 7. After having tried all that without success, feel free to open up a new issue. Make sure to explain what you have tried and what the results were. There is no guarantee I will respond within reasonable time as I'm a busy student myself. If you can fix the issue yourself, feel free to open a merge request with the fix.
 
 
