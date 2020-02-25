@@ -479,10 +479,6 @@ def setup_arg_parser():
 parser = setup_arg_parser()
 args = parser.parse_args()
 
-# Print help and exit if no arguments were passed
-if len(sys.argv) == 1:
-    parser.print_help()
-    sys.exit()
 
 # Apply commands from input
 apply_args(args)
@@ -513,6 +509,17 @@ if args.file:
 links += args.lecture_link
         
 
+# Print basic usage and exit if no lecture links are passed
+if not links:
+    print_information("You haven't added any lecture links! To download a lecture video you need to pass a link to the lecture, e.g.:")
+    print_information("    python3 vo-scraper.py https://video.ethz.ch/lectures/d-infk/2019/spring/252-0028-00L.html")
+    print_information("")
+    print_information("You can also pass optional arguments. For example, the following command downloads all lectures of \"Design of Digital Circuits\" in low quality:")
+    print_information("    python3 vo-scraper.py --quality low --all https://video.ethz.ch/lectures/d-infk/2019/spring/252-0028-00L.html")
+    print_information("")
+    print_information("To see all possible arguments run \"python3 vo-scraper.py --help\"")
+    sys.exit()
+    
 # Run scraper for every link provided
 for item in links:
     print_information("Currently selected: " + item, verbose_only=True)
