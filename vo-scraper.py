@@ -45,6 +45,9 @@ except:
 #
 # ========================================================================
 
+program_version = '1.0'
+remote_version_link = "https://gitlab.ethz.ch/tgeorg/vo-scraper/raw/master/VERSION"
+
 user_agent = 'Mozilla/5.0'
 cookie_jar = requests.cookies.RequestsCookieJar()
 
@@ -57,6 +60,7 @@ series_metadata_suffix = ".series-metadata.json"
 video_info_prefix = "https://video.ethz.ch/.episode-video.json?recordId="
 directory_prefix = "Lecture Recordings/"
 
+gitlab_repo_page = "https://gitlab.ethz.ch/tgeorg/vo-scraper/"
 gitlab_issue_page = "https://gitlab.ethz.ch/tgeorg/vo-scraper/issues"
 
 video_quality = "high"
@@ -386,6 +390,47 @@ def report_bug():
     print_information("Exiting...")
     sys.exit(0)
 
+def version_tuple(version):
+    """Takes a string and turns into an integer tuple, splitting on `.`"""
+    return tuple(map(int, (version.split('.'))))
+
+def check_update():
+    """
+    Checks for a new version of the scraper and prompts the user if a new version is available
+    """
+    global program_version
+    global remote_version_link
+    
+    print_information("Checking for update", verbose_only=True)
+
+    # try/except block to not crash the scraper just because it couldn't connect to server holding the version number
+    try:
+        r = requests.get(remote_version_link)
+        remote_version_string = r.text
+
+        if r.status_code == 200: # Loading the version number succeeded
+        
+            remote_version = version_tuple(remote_version_string)
+            local_version = version_tuple(program_version)
+
+
+            if remote_version > local_version:
+                # There's an update available, prompt the user
+                print_information("A new version of the scraper is available: " + '.'.join(map(str,remote_version)), type='warning')
+                print_information("You have version: " + '.'.join(map(str,local_version)), type='warning')
+                print_information("You can download the new version from here: " + gitlab_repo_page, type='warning')
+                print_information("Press enter to continue with the current version", type='warning')
+                input()
+            else:
+                # We are up to date
+                print_information("Scraper is up to date according to version number in remote repo.", verbose_only=True)
+        else:
+            raise Exception # We couldn't get the file for some reason
+    except:
+        # Update check failed
+        print_information("Update check failed, skipping...", type='warning')
+        # Note: We don't want the scraper to fail because it couldn't check for a new version so we continue regardless
+
 def apply_args(args):
     """Applies the provided command line arguments
     The following are handled here:
@@ -455,9 +500,14 @@ def setup_arg_parser():
         help="Select video quality. Accepted values are \"high\" (1920x1080), \"medium\" (1280x720), and \"low\" (640x360). Default is \"high\""
     )
     parser.add_argument(
-        "-s", "--skip-connection-check",
+        "-sc", "--skip-connection-check",
         action="store_true",
         help="Skip checking whether there's a connection to video.ethz.ch or the internet in general."
+    )
+    parser.add_argument(
+        "-su", "--skip-update-check",
+        action="store_true",
+        help="Skip checking whether there's an update available for the scraper"
     )
     parser.add_argument(
         "-v", "--verbose",
@@ -488,6 +538,12 @@ if not args.skip_connection_check:
     check_connection()
 else:
     print_information("Connection check skipped.", verbose_only=True)
+
+# Update check
+if not args.skip_update_check:
+    check_update()
+else:
+    print_information("Update check skipped.", verbose_only=True)
 
 # Store where to print video source
 if print_src and args.print_src:
