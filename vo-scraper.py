@@ -182,6 +182,30 @@ def acquire_login_cookie(protection, vo_link):
     
     return cookie_jar
 
+def pretty_print_lectures(vo_json_data):
+    """Prints the available episodes of a lecture"""
+    global link_counter
+    
+    nr_length = len(" Lecture Nr.")
+    max_title_length = max([len(episode['title']) for episode in vo_json_data['episodes']])
+    max_lecturer_length = max([len(str(episode['createdBy'])) for episode in vo_json_data['episodes']])
+    
+    # Print available episodes
+    print_information(" Lecture Nr." + " | " + "Name".ljust(max_title_length) + " | " + "Lecturer".ljust(max_lecturer_length) + " | "+ "Date")
+    counter = 0
+    for episode in vo_json_data['episodes']:
+        print_information(
+            "%3d".ljust(nr_length) % counter
+            + " | " +
+            episode['title'].ljust(max_title_length)
+            + " | " +
+            str(episode['createdBy'])
+            + " | " +
+            episode['createdAt'][:-6]
+        )
+        counter += 1
+        link_counter += 1
+
 def vo_scrapper(vo_link):
     """
     Gets the list of all available videos for a lecture.
@@ -189,7 +213,6 @@ def vo_scrapper(vo_link):
     Afterwards passes the links to the video source to `downloader()`
     """
     global user_agent
-    global link_counter
     global download_all
 
     global video_quality
@@ -211,19 +234,14 @@ def vo_scrapper(vo_link):
     r = requests.get(vo_link + series_metadata_suffix, headers={'User-Agent': user_agent})
     vo_json_data = json.loads(r.text)
 
-    # print available episode
-    print_information("Lecture Nr. | Name | Lecturer | Date")
-    counter = 0
-    for episode in vo_json_data['episodes']:
-        print_information("%2d" % counter + " | " + episode['title'] + " | " + str(episode['createdBy']) + " | " + episode['createdAt'][:-6])
-        counter += 1
-        link_counter += 1
+    # Print available lectures
+    pretty_print_lectures(vo_json_data)
 
     # get video selections
     choice = list()
     if download_all:
         # add all available videos to the selected
-        choice = list(range(counter))
+        choice = list(range(len(vo_json_data['episodes'])))
     else:
         # let user pick videos
         try:
