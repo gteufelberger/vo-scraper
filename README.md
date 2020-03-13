@@ -32,9 +32,10 @@ To see a list of possible arguments check
 
 #### A: Use `--file <filename>` 
 
-The file should have a link on each new line. It should look something like this:
+The file should have a single link for each new line. Lines starting with `#` will be ignored and can be used for comments. It should look something like this:
 
     https://video.ethz.ch/lectures/<department>/<year>/<spring/autumn>/XXX-XXXX-XXL.html
+    # This is a comment
     https://video.ethz.ch/lectures/<department>/<year>/<spring/autumn>/XXX-XXXX-XXL.html
     ...
 
