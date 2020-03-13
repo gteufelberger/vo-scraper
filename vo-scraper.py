@@ -449,6 +449,25 @@ def check_update():
         print_information("Update check failed, skipping...", type='warning')
         # Note: We don't want the scraper to fail because it couldn't check for a new version so we continue regardless
 
+def read_links_from_file(file):
+    links = list()
+    if os.path.isfile(file):
+        # read provided file    
+        with open (file, "r") as myfile:
+            file_links = myfile.readlines()
+        
+        # Strip lines containing a `#` symbol as they are comments
+        file_links = [line for line in file_links if not line.startswith('#')]
+        
+        # Strip newlines
+        file_links = [x.rstrip('\n') for x in file_links]
+        
+        # add links from file to the list of links to look at
+        links += file_links
+    else:
+        print_information("No file with name \"" + file +"\" found", type='error')
+    return links
+
 def apply_args(args):
     """Applies the provided command line arguments
     The following are handled here:
@@ -570,16 +589,9 @@ if print_src and args.print_src:
 # Collect lecture links
 links = list()
 if args.file:
-    if os.path.isfile(args.file):
-        # read provided file    
-        with open (args.file, "r") as myfile:
-            file_links = myfile.readlines()
-        # Strip newlines
-        file_links = [x.rstrip('\n') for x in file_links]
-        # add links from file to the list of links to look at
-        links += file_links
-    else:
-        print_information("No file with name \"" + args.file +"\" found", type='error')
+    links += read_links_from_file(args.file)
+    
+# Append links passed through the command line:
 links += args.lecture_link
         
 
