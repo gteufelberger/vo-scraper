@@ -39,6 +39,13 @@ The file should have a single link for each new line. Lines starting with `#` wi
     https://video.ethz.ch/lectures/<department>/<year>/<spring/autumn>/XXX-XXXX-XXL.html
     ...
 
+Additionally you can also add a username and password at the end of the link seperated by a single space:
+    
+    https://video.ethz.ch/lectures/<department>/<year>/<spring/autumn>/XXX-XXXX-XXL.html username passw0rd1
+    ...
+    
+**Note:** This is **NOT** recommended for your NETHZ account password for security reasons!
+
 ### <a name="how_it_works"></a> Q: How does it acquire the videos?
 
 #### A: Like so:

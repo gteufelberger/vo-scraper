@@ -119,14 +119,16 @@ def print_information(str, type='info', verbose_only=False):
         # Always print with tag
         print(print_type_dict[type],str)
 
-def get_credentials():
+def get_credentials(user, passw):
     """Gets user credentials and returns them"""
-    user  = input("Enter your username: ")
-    passw = getpass.getpass()
+    if not user:
+        user  = input("Enter your username: ")
+    if not passw:
+        passw = getpass.getpass()
     
     return(user, passw)
 
-def acquire_login_cookie(protection, vo_link):
+def acquire_login_cookie(protection, vo_link, user, passw):
     """Gets login-cookie by sending user credentials to login server"""
     global user_agent
 
@@ -136,7 +138,7 @@ def acquire_login_cookie(protection, vo_link):
     if protection == "ETH":
         print_information("This lecture requires a NETHZ login")
         while True:
-            (user, passw) = get_credentials()
+            (user, passw) = get_credentials(user, passw)
             
             # setup headers and content to send
             headers = { "Content-Type": "application/x-www-form-urlencoded", "CSRF-Token": "undefined", 'User-Agent': user_agent}
@@ -151,12 +153,13 @@ def acquire_login_cookie(protection, vo_link):
                 break
             else:
                 print_information("Wrong username or password, please try again", type='warning')
+                (user, passw) = ('', '') # Reset passed credentials to not end up in loop if wrong credentials were passed
     
     elif protection == "PWD":
         print_information("This lecture requires a CUSTOM login. Check the lecture's website or your emails for the credentials.")
         
         while True:
-            (user, passw) = get_credentials()
+            (user, passw) = get_credentials(user, passw)
 
             # setup headers and content to send
             headers = {"Referer": vo_link+".html", "User-Agent":user_agent}
@@ -171,6 +174,7 @@ def acquire_login_cookie(protection, vo_link):
                 break
             else:
                 print_information("Wrong username or password, please try again", type='warning')
+                (user, passw) = ('', '') # Reset passed credentials to not end up in loop if wrong credentials were passed
         
     else:
         print_information("Unknown protection type: " + protection, type='error') 
@@ -206,7 +210,7 @@ def pretty_print_lectures(vo_json_data):
         counter += 1
         link_counter += 1
 
-def vo_scrapper(vo_link):
+def vo_scrapper(vo_link, user, passw):
     """
     Gets the list of all available videos for a lecture.
     Allows user to select multiple videos.
@@ -268,7 +272,7 @@ def vo_scrapper(vo_link):
     print_information("Protection: " + vo_json_data["protection"], verbose_only=True)
     if vo_json_data["protection"] != "NONE":
         try:
-            cookie_jar.update(acquire_login_cookie(vo_json_data["protection"], vo_link))
+            cookie_jar.update(acquire_login_cookie(vo_json_data["protection"], vo_link, user, passw))
         except KeyboardInterrupt:
             print()
             print_information("Keyboard interrupt detected, skipping lecture", type='warning')
@@ -594,6 +598,9 @@ if args.file:
 # Append links passed through the command line:
 links += args.lecture_link
         
+# Extract username and password from "link"
+lecture_objects = list()
+lecture_objects +=  [tuple((link.split(' ') + ['',''])[:3]) for link in links] # This gives us tuples of size 3, where user and pw can be empty
 
 # Print basic usage and exit if no lecture links are passed
 if not links:
@@ -607,12 +614,12 @@ if not links:
     sys.exit()
     
 # Run scraper for every link provided
-for item in links:
-    print_information("Currently selected: " + item, verbose_only=True)
-    if "video.ethz.ch" not in item:
+for (link, user, password) in lecture_objects:
+    print_information("Currently selected: " + link, verbose_only=True)
+    if "video.ethz.ch" not in link:
         print_information("Looks like the provided link does not go to 'videos.ethz.ch' and has therefore been skipped. Make sure that it is correct: " + item, type='warning')
     else:    
-        vo_scrapper(item)
+        vo_scrapper(link, user, password)
     print()
 
 # Print summary and exit
