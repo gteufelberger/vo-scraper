@@ -209,7 +209,20 @@ def pretty_print_lectures(vo_json_data):
         )
         counter += 1
         link_counter += 1
-
+    
+def pretty_print_selection(vo_json_data, choice):
+    """Prints the user selected episodes in a nice way """
+    
+    # Get length of longest strings for nice formatting when printing
+    max_title_length = max([len(episode['title']) for episode in vo_json_data['episodes']])
+    max_lecturer_length = max([len(str(episode['createdBy'])) for episode in vo_json_data['episodes']])
+    
+    # Print the selected episodes
+    print_information("You selected:")
+    for item_nr in choice:
+        item = vo_json_data['episodes'][item_nr]
+        print_information(" - %2d" % item_nr + " " + item['title'].ljust(max_title_length) + " " + str(item['createdBy']).ljust(max_lecturer_length) + " " + item['createdAt'][:-6])
+    
 def vo_scrapper(vo_link, user, passw):
     """
     Gets the list of all available videos for a lecture.
@@ -262,10 +275,7 @@ def vo_scrapper(vo_link, user, passw):
         print_information("No videos selected")
         return # nothing to do anymore
     else:
-        print_information("You selected:")
-        for item_nr in choice:
-            item = vo_json_data['episodes'][item_nr]
-            print_information(" - %2d" % item_nr + " " + item['title'] + " " + str(item['createdBy']) + " " + item['createdAt'][:-6])
+        pretty_print_selection(vo_json_data, choice)
     print()
 
     # check whether lecture requires login and get credentials if necessary
