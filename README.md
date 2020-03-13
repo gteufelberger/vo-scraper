@@ -30,13 +30,21 @@ To see a list of possible arguments check
 
 ### Q: How do I pass a file with links to multiple lectures?
 
-#### A: Use `--file <filename>` 
+#### A: Use `--file <filename>`
 
-The file should have a link on each new line. It should look something like this:
+The file should have a single link for each new line. Lines starting with `#` will be ignored and can be used for comments. It should look something like this:
 
     https://video.ethz.ch/lectures/<department>/<year>/<spring/autumn>/XXX-XXXX-XXL.html
+    # This is a comment
     https://video.ethz.ch/lectures/<department>/<year>/<spring/autumn>/XXX-XXXX-XXL.html
     ...
+
+Additionally you can also add a username and password at the end of the link seperated by a single space:
+
+    https://video.ethz.ch/lectures/<department>/<year>/<spring/autumn>/XXX-XXXX-XXL.html username passw0rd1
+    ...
+
+**Note:** This is **NOT** recommended for your NETHZ account password for security reasons!
 
 ### <a name="how_it_works"></a> Q: How does it acquire the videos?
 
@@ -117,7 +125,7 @@ with the following headers:
 
     Referer: <lecture link>.html
     User-Agent: Mozilla/5.0
-            
+
 as well as the following parametres:
 
     __charset__: utf-8
@@ -141,8 +149,7 @@ In both cases we get back a cookie which we then can include when requesting the
 
 ### Q: Can you fix *X*? Can you implement feature *Y*?
 
-#### A: Feel free open a merge request with the requested change implemented. If I like it, I'll merge it.
-
+#### A: Feel free to open an issue [here](https://gitlab.ethz.ch/tgeorg/vo-scraper/issues). Merge requests are always welcome but subject to my own moderation.
 ***
 
 Loosely based on https://gitlab.ethz.ch/dominik/infk-vorlesungsscraper
