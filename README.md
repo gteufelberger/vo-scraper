@@ -30,7 +30,7 @@ To see a list of possible arguments check
 
 ### Q: How do I pass a file with links to multiple lectures?
 
-#### A: Use `--file <filename>` 
+#### A: Use `--file <filename>`
 
 The file should have a single link for each new line. Lines starting with `#` will be ignored and can be used for comments. It should look something like this:
 
@@ -40,10 +40,10 @@ The file should have a single link for each new line. Lines starting with `#` wi
     ...
 
 Additionally you can also add a username and password at the end of the link seperated by a single space:
-    
+
     https://video.ethz.ch/lectures/<department>/<year>/<spring/autumn>/XXX-XXXX-XXL.html username passw0rd1
     ...
-    
+
 **Note:** This is **NOT** recommended for your NETHZ account password for security reasons!
 
 ### <a name="how_it_works"></a> Q: How does it acquire the videos?
@@ -125,7 +125,7 @@ with the following headers:
 
     Referer: <lecture link>.html
     User-Agent: Mozilla/5.0
-            
+
 as well as the following parametres:
 
     __charset__: utf-8
