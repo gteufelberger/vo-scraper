@@ -186,20 +186,18 @@ def acquire_login_cookie(protection, vo_link, user, passw):
 
     return cookie_jar
 
-def pretty_print_lectures(vo_json_data):
-    """Prints the available episodes of a lecture"""
-    global link_counter
-
+def pretty_print_episodes(vo_json_data, selected):
+    """Prints the episode numbers that match `selected`"""
+    # Get length of longest strings for nice formatting when printing
     nr_length = len(" Nr.")
     max_title_length = max([len(episode['title']) for episode in vo_json_data['episodes']])
     max_lecturer_length = max([len(str(episode['createdBy'])) for episode in vo_json_data['episodes']])
 
-    # Print available episodes
-    print_information(" Nr." + " | " + "Name".ljust(max_title_length) + " | " + "Lecturer".ljust(max_lecturer_length) + " | "+ "Date")
-    counter = 0
-    for episode in vo_json_data['episodes']:
+    # Print the selected episodes
+    for episode_nr in selected:
+        episode = vo_json_data['episodes'][episode_nr]
         print_information(
-            "%3d".ljust(nr_length) % counter
+            "%3d".ljust(nr_length) % episode_nr
             + " | " +
             episode['title'].ljust(max_title_length)
             + " | " +
@@ -207,21 +205,7 @@ def pretty_print_lectures(vo_json_data):
             + " | " +
             episode['createdAt'][:-6]
         )
-        counter += 1
-        link_counter += 1
 
-def pretty_print_selection(vo_json_data, choice):
-    """Prints the user selected episodes in a nice way """
-
-    # Get length of longest strings for nice formatting when printing
-    max_title_length = max([len(episode['title']) for episode in vo_json_data['episodes']])
-    max_lecturer_length = max([len(str(episode['createdBy'])) for episode in vo_json_data['episodes']])
-
-    # Print the selected episodes
-    print_information("You selected:")
-    for item_nr in choice:
-        item = vo_json_data['episodes'][item_nr]
-        print_information(" - %2d" % item_nr + " " + item['title'].ljust(max_title_length) + " " + str(item['createdBy']).ljust(max_lecturer_length) + " " + item['createdAt'][:-6])
 
 def vo_scrapper(vo_link, user, passw):
     """
@@ -243,6 +227,8 @@ def vo_scrapper(vo_link, user, passw):
     global video_info_prefix
     global directory_prefix
 
+    global link_counter
+
     # remove `.html` file extension
     if vo_link.endswith('.html'):
         vo_link = vo_link[:-5]
@@ -251,8 +237,11 @@ def vo_scrapper(vo_link, user, passw):
     r = requests.get(vo_link + series_metadata_suffix, headers={'User-Agent': user_agent})
     vo_json_data = json.loads(r.text)
 
+    # Increase counter for stats
+    link_counter += len(vo_json_data['episodes'])
+
     # Print available lectures
-    pretty_print_lectures(vo_json_data)
+    pretty_print_episodes(vo_json_data, range(len(vo_json_data['episodes'])))
 
     # get video selections
     choice = list()
@@ -275,7 +264,8 @@ def vo_scrapper(vo_link, user, passw):
         print_information("No videos selected")
         return # nothing to do anymore
     else:
-        pretty_print_selection(vo_json_data, choice)
+        print_information("You selected:")
+        pretty_print_episodes(vo_json_data, choice)
     print()
 
     # check whether lecture requires login and get credentials if necessary
