@@ -190,12 +190,12 @@ def pretty_print_lectures(vo_json_data):
     """Prints the available episodes of a lecture"""
     global link_counter
     
-    nr_length = len(" Lecture Nr.")
+    nr_length = len(" Nr.")
     max_title_length = max([len(episode['title']) for episode in vo_json_data['episodes']])
     max_lecturer_length = max([len(str(episode['createdBy'])) for episode in vo_json_data['episodes']])
     
     # Print available episodes
-    print_information(" Lecture Nr." + " | " + "Name".ljust(max_title_length) + " | " + "Lecturer".ljust(max_lecturer_length) + " | "+ "Date")
+    print_information(" Nr." + " | " + "Name".ljust(max_title_length) + " | " + "Lecturer".ljust(max_lecturer_length) + " | "+ "Date")
     counter = 0
     for episode in vo_json_data['episodes']:
         print_information(
