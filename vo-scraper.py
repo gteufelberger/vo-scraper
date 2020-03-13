@@ -203,7 +203,7 @@ def pretty_print_lectures(vo_json_data):
             + " | " +
             episode['title'].ljust(max_title_length)
             + " | " +
-            str(episode['createdBy'])
+            str(episode['createdBy']).ljust(max_lecturer_length)
             + " | " +
             episode['createdAt'][:-6]
         )
