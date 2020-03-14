@@ -49,7 +49,7 @@ except:
 # Links to repo
 gitlab_repo_page = "https://gitlab.ethz.ch/tgeorg/vo-scraper/"
 gitlab_issue_page = gitlab_repo_page+"issues"
-
+gitlab_changelog_page = gitlab_repo_page+"-/tags/v"
 remote_version_link = gitlab_repo_page+"raw/master/VERSION"
 program_version = '1.0'
 
@@ -449,6 +449,8 @@ def check_update():
     """
     global program_version
     global remote_version_link
+    global gitlab_repo_page
+    global gitlab_changelog_page
 
     print_information("Checking for update", verbose_only=True)
 
@@ -465,9 +467,10 @@ def check_update():
 
             if remote_version > local_version:
                 # There's an update available, prompt the user
-                print_information("A new version of the scraper is available: " + '.'.join(map(str,remote_version)), type='warning')
+                print_information("A new version of the VO-scraper is available: " + '.'.join(map(str,remote_version)), type='warning')
                 print_information("You have version: " + '.'.join(map(str,local_version)), type='warning')
                 print_information("You can download the new version from here: " + gitlab_repo_page, type='warning')
+                print_information("The changelog can be found here: " + gitlab_changelog_page + '.'.join(map(str,remote_version)), type='warning')
                 print_information("Press enter to continue with the current version", type='warning')
                 input()
             else:
