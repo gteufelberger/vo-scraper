@@ -654,7 +654,7 @@ else:
 for (link, user, password) in lecture_objects:
     print_information("Currently selected: " + link, verbose_only=True)
     if "video.ethz.ch" not in link:
-        print_information("Looks like the provided link does not go to 'videos.ethz.ch' and has therefore been skipped. Make sure that it is correct: " + item, type='warning')
+        print_information("Looks like the provided link does not go to 'videos.ethz.ch' and has therefore been skipped. Make sure that it is correct: " + link, type='warning')
     else:
         vo_scrapper(link, user, password)
     print()
