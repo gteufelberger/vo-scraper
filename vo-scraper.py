@@ -51,7 +51,7 @@ gitlab_repo_page = "https://gitlab.ethz.ch/tgeorg/vo-scraper/"
 gitlab_issue_page = gitlab_repo_page+"issues"
 gitlab_changelog_page = gitlab_repo_page+"-/tags/v"
 remote_version_link = gitlab_repo_page+"raw/master/VERSION"
-program_version = '1.0'
+program_version = '1.1'
 
 # For web requests
 user_agent = 'Mozilla/5.0'
@@ -602,7 +602,7 @@ def print_usage():
     print_information("    \"python3 vo-scraper.py --quality low --all https://video.ethz.ch/lectures/d-infk/2019/spring/252-0028-00L.html\"")
     print_information("")
     print_information("To see all possible arguments run \"python3 vo-scraper.py --help\"")
-    
+
 
 # ===============================================================
 #  __  __           _
