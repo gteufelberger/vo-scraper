@@ -62,7 +62,7 @@ link_counter = 0
 download_counter = 0
 skip_counter = 0
 
-# 
+#
 series_metadata_suffix = ".series-metadata.json"
 video_info_prefix = "https://video.ethz.ch/.episode-video.json?recordId="
 directory_prefix = "Lecture Recordings/"
@@ -125,7 +125,12 @@ def print_information(str, type='info', verbose_only=False):
         print(print_type_dict[type],str)
 
 def get_credentials(user, passw):
-    """Gets user credentials and returns them"""
+    """Gets user credentials and returns them
+
+    Keyword arguments:
+    user  -- The username passed from a text file
+    passw -- The password passed from a text file
+    """
     if not user:
         user  = input("Enter your username: ")
     if not passw:
@@ -134,7 +139,14 @@ def get_credentials(user, passw):
     return(user, passw)
 
 def acquire_login_cookie(protection, vo_link, user, passw):
-    """Gets login-cookie by sending user credentials to login server"""
+    """Gets login-cookie by sending user credentials to login server
+
+    Keyword arguments:
+    protection  -- The type of login the lecture requires (NETHZ or custom password)
+    vo_link     -- The link to the lecture
+    user        -- The username passed from a text file
+    passw       -- The password passed from a text file
+    """
     global user_agent
 
     # Setup cookie_jar
@@ -217,6 +229,11 @@ def vo_scrapper(vo_link, user, passw):
     Gets the list of all available videos for a lecture.
     Allows user to select multiple videos.
     Afterwards passes the links to the video source to `downloader()`
+
+    Keyword arguments:
+    vo_link -- The link to the lecture
+    user    -- The username passed from a text file
+    passw   -- The password passed from a text file
     """
     global user_agent
     global download_all
@@ -355,7 +372,12 @@ def vo_scrapper(vo_link, user, passw):
             downloader(file_name, video_src_link)
 
 def downloader(file_name, video_src_link):
-    """Downloads the video and gives progress information"""
+    """Downloads the video and gives progress information
+
+    Keyword arguments:
+    file_name      -- Name of the file to write the data to
+    video_src_link -- The link to download the data from
+    """
     global download_counter
     global skip_counter
 
@@ -459,6 +481,11 @@ def check_update():
         # Note: We don't want the scraper to fail because it couldn't check for a new version so we continue regardless
 
 def read_links_from_file(file):
+    """Reads the links from a text file
+    Each link should be on a seperate line
+    Lines starting with `#` will be ignored
+    Username and password can be added at the end of the link seperated by a space
+    """
     links = list()
     if os.path.isfile(file):
         # Read provided file
@@ -484,6 +511,7 @@ def apply_args(args):
      - bug
      - all
      - quality
+     - print-src
     """
 
     global verbose
@@ -510,7 +538,7 @@ def apply_args(args):
         print_src=True
 
 def setup_arg_parser():
-    """Sets the parser up"""
+    """Sets the parser up to handle all possible flags"""
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -574,7 +602,6 @@ def setup_arg_parser():
 # Setup parser
 parser = setup_arg_parser()
 args = parser.parse_args()
-
 
 # Apply commands from input
 apply_args(args)
