@@ -617,18 +617,6 @@ args = parser.parse_args()
 # Apply commands from input
 apply_args(args)
 
-# Connection check
-if not args.skip_connection_check:
-    check_connection()
-else:
-    print_information("Connection check skipped.", verbose_only=True)
-
-# Update check
-if not args.skip_update_check:
-    check_update()
-else:
-    print_information("Update check skipped.", verbose_only=True)
-
 # Store where to print video source
 if print_src and args.print_src:
     file_to_print_src_to = args.print_src
@@ -649,6 +637,18 @@ lecture_objects +=  [tuple((link.split(' ') + ['',''])[:3]) for link in links] #
 if not links:
     print_usage()
     sys.exit()
+
+# Connection check
+if not args.skip_connection_check:
+    check_connection()
+else:
+    print_information("Connection check skipped.", verbose_only=True)
+
+# Update check
+if not args.skip_update_check:
+    check_update()
+else:
+    print_information("Update check skipped.", verbose_only=True)
 
 # Run scraper for every link provided
 for (link, user, password) in lecture_objects:
