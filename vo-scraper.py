@@ -15,7 +15,7 @@ Check README.md and LICENSE before using this program.
 #                   |_|
 # ========================================================================
 
-#import urllib.request, urllib.parse, os, sys, http.client
+# Import urllib.request, urllib.parse, os, sys, http.client
 import urllib.request, os, sys, http.client
 from urllib.request import Request, urlopen
 from sys import platform
@@ -24,13 +24,14 @@ import argparse # For parsing commandline arguments
 import getpass  # For getting the user password
 
 
-# check whether `requests` is installed
+# Check whether `requests` is installed
 try:
     import requests
 except:
     print_information("Required package `requests` is missing, try installing with `pip3 install requests`", type='error')
     sys.exit(1)
 
+# Check whether `webbrowser` is installed
 try:
     import webbrowser # only used to open the user's browser when reporting a bug
 except:
@@ -45,24 +46,28 @@ except:
 #
 # ========================================================================
 
-program_version = '1.0'
-remote_version_link = "https://gitlab.ethz.ch/tgeorg/vo-scraper/raw/master/VERSION"
+# Links to repo
+gitlab_repo_page = "https://gitlab.ethz.ch/tgeorg/vo-scraper/"
+gitlab_issue_page = gitlab_repo_page+"issues"
 
+remote_version_link = gitlab_repo_page+"raw/master/VERSION"
+program_version = '1.0'
+
+# For web requests
 user_agent = 'Mozilla/5.0'
 cookie_jar = requests.cookies.RequestsCookieJar()
 
-#for stats
+# For stats
 link_counter = 0
 download_counter = 0
 skip_counter = 0
 
+# 
 series_metadata_suffix = ".series-metadata.json"
 video_info_prefix = "https://video.ethz.ch/.episode-video.json?recordId="
 directory_prefix = "Lecture Recordings/"
 
-gitlab_repo_page = "https://gitlab.ethz.ch/tgeorg/vo-scraper/"
-gitlab_issue_page = "https://gitlab.ethz.ch/tgeorg/vo-scraper/issues"
-
+# Default quality
 video_quality = "high"
 
 download_all = False
@@ -110,10 +115,10 @@ def print_information(str, type='info', verbose_only=False):
 
     if not verbose_only:
         if type == 'info' and not verbose:
-            # print without tag
+            # Print without tag
             print(str)
         else:
-            # print with tag
+            # Print with tag
             print(print_type_dict[type], str)
     elif verbose:
         # Always print with tag
@@ -132,7 +137,7 @@ def acquire_login_cookie(protection, vo_link, user, passw):
     """Gets login-cookie by sending user credentials to login server"""
     global user_agent
 
-    # setup cookie_jar
+    # Setup cookie_jar
     cookie_jar = requests.cookies.RequestsCookieJar()
 
     if protection == "ETH":
@@ -140,14 +145,14 @@ def acquire_login_cookie(protection, vo_link, user, passw):
         while True:
             (user, passw) = get_credentials(user, passw)
 
-            # setup headers and content to send
+            # Setup headers and content to send
             headers = { "Content-Type": "application/x-www-form-urlencoded", "CSRF-Token": "undefined", 'User-Agent': user_agent}
             data = { "__charset__": "utf-8", "j_validate": True, "j_username": user, "j_password": passw}
 
-            # request login-cookie
+            # Request login-cookie
             r = requests.post("https://video.ethz.ch/j_security_check", headers=headers, data=data)
 
-            # put login cookie in cookie_jar
+            # Put login cookie in cookie_jar
             cookie_jar = r.cookies
             if cookie_jar:
                 break
@@ -161,14 +166,14 @@ def acquire_login_cookie(protection, vo_link, user, passw):
         while True:
             (user, passw) = get_credentials(user, passw)
 
-            # setup headers and content to send
+            # Setup headers and content to send
             headers = {"Referer": vo_link+".html", "User-Agent":user_agent}
             data = { "__charset__": "utf-8", "username": user, "password": passw }
 
-            # get login cookie
+            # Get login cookie
             r = requests.post(vo_link+".series-login.json", headers=headers, data=data)
 
-            # put login cookie in cookie_jar
+            # Put login cookie in cookie_jar
             cookie_jar = r.cookies
             if cookie_jar:
                 break
@@ -229,11 +234,11 @@ def vo_scrapper(vo_link, user, passw):
 
     global link_counter
 
-    # remove `.html` file extension
+    # Remove `.html` file extension
     if vo_link.endswith('.html'):
         vo_link = vo_link[:-5]
 
-    # get lecture metadata for episode list
+    # Get lecture metadata for episode list
     r = requests.get(vo_link + series_metadata_suffix, headers={'User-Agent': user_agent})
     vo_json_data = json.loads(r.text)
 
@@ -243,13 +248,13 @@ def vo_scrapper(vo_link, user, passw):
     # Print available lectures
     pretty_print_episodes(vo_json_data, range(len(vo_json_data['episodes'])))
 
-    # get video selections
+    # Get video selections
     choice = list()
     if download_all:
-        # add all available videos to the selected
+        # Add all available videos to the selected
         choice = list(range(len(vo_json_data['episodes'])))
     else:
-        # let user pick videos
+        # Let user pick videos
         try:
             choice = [int(x) for x in input(
                 "Enter numbers of the above lectures you want to download separated by space (e.g. 0 5 12 14)\nJust press enter if you don't want to download anything from this lecture\n"
@@ -259,16 +264,16 @@ def vo_scrapper(vo_link, user, passw):
             print_information("Exiting...")
             sys.exit()
 
-    # print the user's choice
+    # Print the user's choice
     if not choice:
         print_information("No videos selected")
-        return # nothing to do anymore
+        return # Nothing to do anymore
     else:
         print_information("You selected:")
         pretty_print_episodes(vo_json_data, choice)
     print()
 
-    # check whether lecture requires login and get credentials if necessary
+    # Check whether lecture requires login and get credentials if necessary
     print_information("Protection: " + vo_json_data["protection"], verbose_only=True)
     if vo_json_data["protection"] != "NONE":
         try:
@@ -278,20 +283,20 @@ def vo_scrapper(vo_link, user, passw):
             print_information("Keyboard interrupt detected, skipping lecture", type='warning')
             return
 
-    # collect links and download them
+    # Collect links and download them
     for item_nr in choice:
-        # get link to video metadata json file
+        # Get link to video metadata json file
         item = vo_json_data['episodes'][item_nr]
         video_info_link = video_info_prefix+item['id']
 
-        # download the video metadata file
-        # use login-cookie if provided otherwise make request without cookie
+        # Download the video metadata file
+        # Use login-cookie if provided otherwise make request without cookie
         if(cookie_jar):
             r = requests.get(video_info_link, cookies=cookie_jar, headers={'User-Agent': user_agent})
         else:
             r = requests.get(video_info_link, headers={'User-Agent': user_agent})
         if(r.status_code == 401):
-            # the lecture requires a login
+            # The lecture requires a login
             print_information("Received 401 response. The following lecture requires a valid login cookie:", type='error')
             item = vo_json_data['episodes'][item_nr]
             print_information("%2d" % item_nr + " " + item['title'] + " " + str(item['createdBy']) + " " + item['createdAt'][:-6], type='error')
@@ -301,7 +306,7 @@ def vo_scrapper(vo_link, user, passw):
         video_json_data = json.loads(r.text)
 
 
-        # put available versions in list for sorting by video quality
+        # Put available versions in list for sorting by video quality
         counter = 0
         versions = list()
         print_information("Available versions:", verbose_only=True)
@@ -312,19 +317,19 @@ def vo_scrapper(vo_link, user, passw):
         versions.sort(key=lambda tup: tup[1])
         # Now it's sorted: low -> medium -> high
 
-        # get video src url from json
+        # Get video src url from json
         video_src_link = video_json_data['streams'][0]['sources']['mp4'][versions[quality_dict[video_quality]][0]]['src']
 
         lecture_titel = vo_json_data['title']
         video_title   = vo_json_data["episodes"][item_nr]["title"]
 
-        # if video and lecture title overlap, remove lecture title from video title
+        # If video and lecture title overlap, remove lecture title from video title
         if video_title.startswith(lecture_titel):
             video_title = video_title[len(lecture_titel):]
-        # append date
+        # Append date
         video_title = item['createdAt'][:-6]+video_title
 
-        # create directory for video if it does not already exist
+        # Create directory for video if it does not already exist
         directory = directory_prefix + lecture_titel +"/"
         if not os.path.isdir(directory):
             os.makedirs(directory)
@@ -332,20 +337,20 @@ def vo_scrapper(vo_link, user, passw):
         else:
             print_information("This folder already exists: " + directory, verbose_only=True)
 
-        # filename is `directory/<video date (YYYY-MM-DD)><leftovers from video title>-<quality>.mp4`
+        # Filename is `directory/<video date (YYYY-MM-DD)><leftovers from video title>-<quality>.mp4`
         file_name = directory+video_title+"_"+video_quality+".mp4"
         print_information(file_name, verbose_only=True)
 
-        # check for print_src flag
+        # Check for print_src flag
         if print_src:
-            # print to file if given
+            # Print to file if given
             if file_to_print_src_to:
                 print_information("Printing " + video_src_link + "to file: "+ file_to_print_src_to, verbose_only=True)
                 with open(file_to_print_src_to,"a") as f:
                     f.write(video_src_link+"\n")
             else:
                 print_information(video_src_link)
-        # otherwise download video
+        # Otherwise download video
         else:
             downloader(file_name, video_src_link)
 
@@ -356,11 +361,11 @@ def downloader(file_name, video_src_link):
 
     print_information("Video source: " + video_src_link, verbose_only=True)
 
-    # check if file already exists
+    # Check if file already exists
     if os.path.isfile(file_name):
         print_information("download skipped - file already exists: " + file_name.split('/')[-1])
         skip_counter += 1
-    # otherwise download it
+    # Otherwise download it
     else:
         # cf.: https://stackoverflow.com/questions/15644964/python-progress-bar-and-downloads
         with open(file_name+".part", "wb") as f:
@@ -369,10 +374,10 @@ def downloader(file_name, video_src_link):
 
             print_information("Downloading " + file_name.split('/')[-1] + " (%.2f" % (int(total_length)/1024/1024) + " MiB)")
 
-            if total_length is None: # no content length header
+            if total_length is None: # We received no content length header
                 f.write(response.content)
             else:
-                # download file and show progress bar
+                # Download file and show progress bar
                 dl = 0
                 total_length = int(total_length)
                 for data in response.iter_content(chunk_size=4096):
@@ -456,7 +461,7 @@ def check_update():
 def read_links_from_file(file):
     links = list()
     if os.path.isfile(file):
-        # read provided file
+        # Read provided file
         with open (file, "r") as myfile:
             file_links = myfile.readlines()
 
@@ -466,7 +471,7 @@ def read_links_from_file(file):
         # Strip newlines
         file_links = [x.rstrip('\n') for x in file_links]
 
-        # add links from file to the list of links to look at
+        # Add links from file to the list of links to look at
         links += file_links
     else:
         print_information("No file with name \"" + file +"\" found", type='error')
@@ -487,7 +492,7 @@ def apply_args(args):
 
     global print_src
 
-    #enable verbose for debugging
+    # Enable verbose for debugging
     verbose = args.verbose
     print_information("Verbose enabled", verbose_only=True)
 
@@ -496,11 +501,11 @@ def apply_args(args):
         print_information("If you found a bug you can raise an issue here: ")
         report_bug()
 
-    # set global variable according to input
+    # Set global variable according to input
     download_all = args.all
     video_quality = args.quality
 
-    # check for printing flag
+    # Check for printing flag
     if hasattr(args, 'print_src'):
         print_src=True
 
