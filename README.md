@@ -1,3 +1,7 @@
+#### ⚠ **Important**: In order to not overburden ETH servers during the current situation, I highly recommend only downloading videos outside of peak hours, i.e. early in the morning or late at night ⚠
+
+***
+
 # vo-scraper
 
 A python script for ETH students to download lecture videos from [video.ethz.ch](https://video.ethz.ch/).
