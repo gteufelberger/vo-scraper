@@ -207,6 +207,7 @@ def pretty_print_episodes(vo_json_data, selected):
     """Prints the episode numbers that match `selected`"""
     # Get length of longest strings for nice formatting when printing
     nr_length = len(" Nr.")
+    max_date_length = max([len(str(episode['createdAt'][:-6])) for episode in vo_json_data['episodes']])
     max_title_length = max([len(episode['title']) for episode in vo_json_data['episodes']])
     max_lecturer_length = max([len(str(episode['createdBy'])) for episode in vo_json_data['episodes']])
 
@@ -214,9 +215,11 @@ def pretty_print_episodes(vo_json_data, selected):
     print_information(
         " Nr."
         + " | " +
+        "Date".ljust(max_date_length)
+        + " | " +
         "Name".ljust(max_title_length)
         + " | " +
-        "Lecturer".ljust(max_lecturer_length) + " | "+ "Date"
+        "Lecturer".ljust(max_lecturer_length)
     )
 
     # Print the selected episodes
@@ -225,11 +228,11 @@ def pretty_print_episodes(vo_json_data, selected):
         print_information(
             "%3d".ljust(nr_length) % episode_nr
             + " | " +
+            episode['createdAt'][:-6].ljust(max_date_length)
+            + " | " +
             episode['title'].ljust(max_title_length)
             + " | " +
             str(episode['createdBy']).ljust(max_lecturer_length)
-            + " | " +
-            episode['createdAt'][:-6]
         )
 
 
