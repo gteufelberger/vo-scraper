@@ -515,13 +515,14 @@ def apply_args(args):
      - all
      - quality
      - print-src
+     - destination
     """
 
     global verbose
     global download_all
     global video_quality
-
     global print_src
+    global directory_prefix
 
     # Enable verbose for debugging
     verbose = args.verbose
@@ -539,6 +540,15 @@ def apply_args(args):
     # Check for printing flag
     if hasattr(args, 'print_src'):
         print_src=True
+
+    # Check for destination flag
+    if hasattr(args, 'destination'):
+        directory_prefix = args.destination
+        print_information("The user passed directory is: " + directory_prefix, verbose_only=True)
+        if not directory_prefix.endswith('/'):
+            # Add trailing slash as the user might have forgotten it
+            directory_prefix += '/'
+            print_information("Added missing slash: " + directory_prefix, verbose_only=True)
 
 def setup_arg_parser():
     """Sets the parser up to handle all possible flags"""
@@ -558,6 +568,10 @@ def setup_arg_parser():
         "-b", "--bug",
         action="store_true",
         help="Print link to GitLab issue page and open it in browser."
+    )
+    parser.add_argument(
+        "-d", "--destination",
+        help="Directory where to save the files to. By default this is the folder \"Lecture Recordings/\" of the current working directory."
     )
     parser.add_argument(
         "-f", "--file",
