@@ -210,6 +210,15 @@ def pretty_print_episodes(vo_json_data, selected):
     max_title_length = max([len(episode['title']) for episode in vo_json_data['episodes']])
     max_lecturer_length = max([len(str(episode['createdBy'])) for episode in vo_json_data['episodes']])
 
+    # Print header
+    print_information(
+        " Nr."
+        + " | " +
+        "Name".ljust(max_title_length)
+        + " | " +
+        "Lecturer".ljust(max_lecturer_length) + " | "+ "Date"
+    )
+
     # Print the selected episodes
     for episode_nr in selected:
         episode = vo_json_data['episodes'][episode_nr]
