@@ -77,9 +77,9 @@ print_src = False
 file_to_print_src_to = ""
 
 quality_dict = {
-    'low'   : 0,
+    'high'  : 0,
     'medium': 1,
-    'high'  : 2
+    'low'   : 2
 }
 
 class bcolors:
@@ -343,11 +343,15 @@ def vo_scrapper(vo_link, user, passw):
             versions.append((counter, vid_version['res']['w']*vid_version['res']['h']))
             print_information(str(counter) + ": " + "%4d" %vid_version['res']['w'] + "x" + "%4d" %vid_version['res']['h'], verbose_only=True)
             counter += 1
-        versions.sort(key=lambda tup: tup[1])
-        # Now it's sorted: low -> medium -> high
+        versions.sort(key=lambda tup: tup[1], reverse=True)
+        # Now it's sorted: high -> medium -> low
 
         # Get video src url from json
-        video_src_link = video_json_data['streams'][0]['sources']['mp4'][versions[quality_dict[video_quality]][0]]['src']
+        try: # try/except block to handle cases were not all three types of quality exist
+            video_src_link = video_json_data['streams'][0]['sources']['mp4'][versions[quality_dict[video_quality]][0]]['src']
+        except IndexError:
+            print_information("Requested quality \"" + video_quality + "\" not available. Skipping episode!", type='error')
+            continue
 
         lecture_titel = vo_json_data['title']
         video_title   = vo_json_data["episodes"][item_nr]["title"]
