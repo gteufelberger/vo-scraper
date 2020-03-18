@@ -554,7 +554,7 @@ def apply_args(args):
         print_src=True
 
     # Check for destination flag
-    if hasattr(args, 'destination'):
+    if args.destination:
         directory_prefix = args.destination
         print_information("The user passed directory is: " + directory_prefix, verbose_only=True)
         if not directory_prefix.endswith('/'):
