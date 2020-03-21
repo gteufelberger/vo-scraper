@@ -514,8 +514,11 @@ def read_links_from_file(file):
         # Strip lines containing a `#` symbol as they are comments
         file_links = [line for line in file_links if not line.startswith('#')]
 
-        # Strip newlines
+        # Strip newline characters
         file_links = [x.rstrip('\n') for x in file_links]
+
+        # Strip empty lines
+        file_links = [line for line in file_links if line]
 
         # Add links from file to the list of links to look at
         links += file_links
