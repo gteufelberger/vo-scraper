@@ -68,7 +68,7 @@ skip_counter = 0
 #
 series_metadata_suffix = ".series-metadata.json"
 video_info_prefix = "https://video.ethz.ch/.episode-video.json?recordId="
-directory_prefix = "Lecture Recordings/"
+directory_prefix = "Lecture Recordings" + os.sep
 
 # Default quality
 video_quality = "high"
@@ -369,15 +369,8 @@ def vo_scrapper(vo_link, user, passw):
         # Append date
         video_title = item['createdAt'][:-6]+video_title
 
-        # Create directory for video if it does not already exist
-        directory = directory_prefix + lecture_titel +"/"
-        if not os.path.isdir(directory):
-            os.makedirs(directory)
-            print_information("This folder was generated: " + directory, verbose_only=True)
-        else:
-            print_information("This folder already exists: " + directory, verbose_only=True)
-
         # Filename is `directory/<video date (YYYY-MM-DD)><leftovers from video title>-<quality>.mp4`
+        directory = directory_prefix + lecture_titel + os.sep
         file_name = directory+video_title+"_"+video_quality+".mp4"
         print_information(file_name, verbose_only=True)
 
@@ -410,6 +403,14 @@ def downloader(file_name, video_src_link):
     # Otherwise download video
     else:
         print_information("Video source: " + video_src_link, verbose_only=True)
+
+        # Create directory for video if it does not already exist
+        directory = os.path.dirname(os.path.abspath(file_name))
+        if not os.path.isdir(directory):
+            os.makedirs(directory)
+            print_information("This folder was generated: " + directory, verbose_only=True)
+        else:
+            print_information("This folder already exists: " + directory, verbose_only=True)
 
         # Check if file already exists
         if os.path.isfile(file_name):
