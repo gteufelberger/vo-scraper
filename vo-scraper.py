@@ -582,6 +582,7 @@ def apply_args(args):
     global download_all
     global video_quality
     global print_src
+    global file_to_print_src_to
     global directory_prefix
     global history_file
 
@@ -601,6 +602,9 @@ def apply_args(args):
     # Check for printing flag
     if hasattr(args, 'print_src'):
         print_src=True
+        # Store where to print video source
+        if args.print_src:
+            file_to_print_src_to = args.print_src
 
     # Check for destination flag
     if args.destination:
@@ -714,10 +718,6 @@ args = parser.parse_args()
 
 # Apply commands from input
 apply_args(args)
-
-# Store where to print video source
-if print_src and args.print_src:
-    file_to_print_src_to = args.print_src
 
 # Collect lecture links
 links = list()
