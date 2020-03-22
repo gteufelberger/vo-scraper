@@ -57,6 +57,9 @@ program_version = '1.1'
 user_agent = 'Mozilla/5.0'
 cookie_jar = requests.cookies.RequestsCookieJar()
 
+# Store video sources in global list
+video_src_collection = list()
+
 # For stats
 link_counter = 0
 download_counter = 0
@@ -70,10 +73,12 @@ directory_prefix = "Lecture Recordings/"
 # Default quality
 video_quality = "high"
 
+# Boolean flags
 download_all = False
 verbose = False
-
 print_src = False
+
+#
 file_to_print_src_to = ""
 
 quality_dict = {
@@ -240,12 +245,15 @@ def vo_scrapper(vo_link, user, passw):
     """
     Gets the list of all available videos for a lecture.
     Allows user to select multiple videos.
-    Afterwards passes the links to the video source to `downloader()`
+    Returns the selected episodes
 
     Keyword arguments:
     vo_link -- The link to the lecture
     user    -- The username passed from a text file
     passw   -- The password passed from a text file
+
+    Returns:
+    A tuple consisting out of the filename and the video_src_link
     """
     global user_agent
     global download_all
@@ -253,9 +261,6 @@ def vo_scrapper(vo_link, user, passw):
     global video_quality
     global quality_dict
     global cookie_jar
-
-    global print_src
-    global file_to_print_src_to
 
     global series_metadata_suffix
     global video_info_prefix
@@ -296,7 +301,7 @@ def vo_scrapper(vo_link, user, passw):
     # Print the user's choice
     if not choice:
         print_information("No videos selected")
-        return # Nothing to do anymore
+        return list() # Nothing to do anymore
     else:
         print_information("You selected:")
         pretty_print_episodes(vo_json_data, choice)
@@ -312,7 +317,9 @@ def vo_scrapper(vo_link, user, passw):
             print_information("Keyboard interrupt detected, skipping lecture", type='warning')
             return
 
-    # Collect links and download them
+    local_video_src_collection = list()
+
+    # Collect links for download
     for item_nr in choice:
         # Get link to video metadata json file
         item = vo_json_data['episodes'][item_nr]
@@ -374,18 +381,9 @@ def vo_scrapper(vo_link, user, passw):
         file_name = directory+video_title+"_"+video_quality+".mp4"
         print_information(file_name, verbose_only=True)
 
-        # Check for print_src flag
-        if print_src:
-            # Print to file if given
-            if file_to_print_src_to:
-                print_information("Printing " + video_src_link + "to file: "+ file_to_print_src_to, verbose_only=True)
-                with open(file_to_print_src_to,"a") as f:
-                    f.write(video_src_link+"\n")
-            else:
-                print_information(video_src_link)
-        # Otherwise download video
-        else:
-            downloader(file_name, video_src_link)
+        local_video_src_collection.append((file_name, video_src_link))
+
+    return local_video_src_collection
 
 def downloader(file_name, video_src_link):
     """Downloads the video and gives progress information
@@ -397,38 +395,52 @@ def downloader(file_name, video_src_link):
     global download_counter
     global skip_counter
 
-    print_information("Video source: " + video_src_link, verbose_only=True)
+    global print_src
+    global file_to_print_src_to
 
-    # Check if file already exists
-    if os.path.isfile(file_name):
-        print_information("download skipped - file already exists: " + file_name.split('/')[-1])
-        skip_counter += 1
-    # Otherwise download it
+    # Check for print_src flag
+    if print_src:
+        # Print to file if given
+        if file_to_print_src_to:
+            print_information("Printing " + video_src_link + "to file: "+ file_to_print_src_to, verbose_only=True)
+            with open(file_to_print_src_to,"a") as f:
+                f.write(video_src_link+"\n")
+        else:
+            print_information(video_src_link)
+    # Otherwise download video
     else:
-        # cf.: https://stackoverflow.com/questions/15644964/python-progress-bar-and-downloads
-        with open(file_name+".part", "wb") as f:
-            response = requests.get(video_src_link, stream=True)
-            total_length = response.headers.get('content-length')
+        print_information("Video source: " + video_src_link, verbose_only=True)
 
-            print_information("Downloading " + file_name.split('/')[-1] + " (%.2f" % (int(total_length)/1024/1024) + " MiB)")
+        # Check if file already exists
+        if os.path.isfile(file_name):
+            print_information("download skipped - file already exists: " + file_name.split('/')[-1])
+            skip_counter += 1
+        # Otherwise download it
+        else:
+            # cf.: https://stackoverflow.com/questions/15644964/python-progress-bar-and-downloads
+            with open(file_name+".part", "wb") as f:
+                response = requests.get(video_src_link, stream=True)
+                total_length = response.headers.get('content-length')
 
-            if total_length is None: # We received no content length header
-                f.write(response.content)
-            else:
-                # Download file and show progress bar
-                dl = 0
-                total_length = int(total_length)
-                for data in response.iter_content(chunk_size=4096):
-                    dl += len(data)
-                    f.write(data)
-                    done = int(50 * dl / total_length)
-                    sys.stdout.write("\r[%s%s]" % ('=' * done, ' ' * (50-done)) )
-                    sys.stdout.flush()
-        print()
+                print_information("Downloading " + file_name.split('/')[-1] + " (%.2f" % (int(total_length)/1024/1024) + " MiB)")
 
-        os.rename(file_name+".part", file_name)
-        print_information("Downloaded file: " + file_name.split('/')[-1])
-        download_counter += 1
+                if total_length is None: # We received no content length header
+                    f.write(response.content)
+                else:
+                    # Download file and show progress bar
+                    dl = 0
+                    total_length = int(total_length)
+                    for data in response.iter_content(chunk_size=4096):
+                        dl += len(data)
+                        f.write(data)
+                        done = int(50 * dl / total_length)
+                        sys.stdout.write("\r[%s%s]" % ('=' * done, ' ' * (50-done)) )
+                        sys.stdout.flush()
+            print()
+
+            os.rename(file_name+".part", file_name)
+            print_information("Downloaded file: " + file_name.split('/')[-1])
+            download_counter += 1
 
 def check_connection():
     """Checks connection to video.ethz.ch and if it fails then also to the internet"""
@@ -686,14 +698,18 @@ if not args.skip_update_check:
 else:
     print_information("Update check skipped.", verbose_only=True)
 
-# Run scraper for every link provided
+# Run scraper for every link provided to get video sources for each episode
 for (link, user, password) in lecture_objects:
     print_information("Currently selected: " + link, verbose_only=True)
     if "video.ethz.ch" not in link:
         print_information("Looks like the provided link does not go to 'videos.ethz.ch' and has therefore been skipped. Make sure that it is correct: " + link, type='warning')
     else:
-        vo_scrapper(link, user, password)
+        video_src_collection += vo_scrapper(link, user, password)
     print()
+
+# Download selected episodes
+for (file_name, video_src_link) in video_src_collection:
+    downloader(file_name, video_src_link)
 
 # Print summary and exit
 print_information(str(link_counter) + " files found, " + str(download_counter) + " downloaded and " + str(skip_counter) + " skipped")
