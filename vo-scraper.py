@@ -606,9 +606,9 @@ def apply_args(args):
     if args.destination:
         directory_prefix = args.destination
         print_information("The user passed directory is: " + directory_prefix, verbose_only=True)
-        if not directory_prefix.endswith('/'):
-            # Add trailing slash as the user might have forgotten it
-            directory_prefix += '/'
+        if not directory_prefix.endswith(os.sep):
+            # Add trailing (back)slash as the user might have forgotten it
+            directory_prefix += os.sep
             print_information("Added missing slash: " + directory_prefix, verbose_only=True)
 
     # Store where to read/print history
