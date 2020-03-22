@@ -78,8 +78,9 @@ download_all = False
 verbose = False
 print_src = False
 
-#
+# Location of text files
 file_to_print_src_to = ""
+history_file = ""
 
 quality_dict = {
     'high'  : 0,
@@ -366,6 +367,10 @@ def vo_scrapper(vo_link, user, passw):
         # If video and lecture title overlap, remove lecture title from video title
         if video_title.startswith(lecture_titel):
             video_title = video_title[len(lecture_titel):]
+        
+        # Extract episode name before adding the date to video_title
+        episode_name = item['createdAt'][:-6] + " " + lecture_titel + video_title
+
         # Append date
         video_title = item['createdAt'][:-6]+video_title
 
@@ -374,16 +379,17 @@ def vo_scrapper(vo_link, user, passw):
         file_name = directory+video_title+"_"+video_quality+".mp4"
         print_information(file_name, verbose_only=True)
 
-        local_video_src_collection.append((file_name, video_src_link))
+        local_video_src_collection.append((file_name, video_src_link, episode_name))
 
     return local_video_src_collection
 
-def downloader(file_name, video_src_link):
+def downloader(file_name, video_src_link, episode_name):
     """Downloads the video and gives progress information
 
     Keyword arguments:
     file_name      -- Name of the file to write the data to
     video_src_link -- The link to download the data from
+    episode_name   -- Name of the episode
     """
     global download_counter
     global skip_counter
@@ -404,6 +410,20 @@ def downloader(file_name, video_src_link):
     else:
         print_information("Video source: " + video_src_link, verbose_only=True)
 
+        # Check history file (if one has been specified) whether episode has already been downloaded
+        if history_file:
+            try:
+                with open(history_file, "r") as file:
+                    if video_src_link in [line.rstrip('\n') for line in file.readlines()]:
+                        print("download skipped - file already recorded in history: " + episode_name)
+                        skip_counter += 1
+                        return
+                    else:
+                        print_information("Link has not yet been recorded in history file", verbose_only=True)
+            except FileNotFoundError:
+                print_information("No history file found at specified location: " + history_file, verbose_only=True)
+                #TODO something here
+
         # Create directory for video if it does not already exist
         directory = os.path.dirname(os.path.abspath(file_name))
         if not os.path.isdir(directory):
@@ -414,7 +434,7 @@ def downloader(file_name, video_src_link):
 
         # Check if file already exists
         if os.path.isfile(file_name):
-            print_information("download skipped - file already exists: " + file_name.split('/')[-1])
+            print_information("download skipped - file already exists: " + episode_name)
             skip_counter += 1
         # Otherwise download it
         else:
@@ -423,7 +443,7 @@ def downloader(file_name, video_src_link):
                 response = requests.get(video_src_link, stream=True)
                 total_length = response.headers.get('content-length')
 
-                print_information("Downloading " + file_name.split('/')[-1] + " (%.2f" % (int(total_length)/1024/1024) + " MiB)")
+                print_information("Downloading " + episode_name + " (%.2f" % (int(total_length)/1024/1024) + " MiB)")
 
                 if total_length is None: # We received no content length header
                     f.write(response.content)
@@ -439,9 +459,15 @@ def downloader(file_name, video_src_link):
                         sys.stdout.flush()
             print()
 
+            # Remove `.part` suffix from file name
             os.rename(file_name+".part", file_name)
-            print_information("Downloaded file: " + file_name.split('/')[-1])
+            print_information("Downloaded file: " + episode_name)
             download_counter += 1
+        
+        if history_file:
+            # Regardless whether we just downloaded the file or it already exists on disk, we want to add it to the history file
+            with open(history_file, "a") as file:
+                file.write(video_src_link + '\n')
 
 def check_connection():
     """Checks connection to video.ethz.ch and if it fails then also to the internet"""
@@ -549,6 +575,7 @@ def apply_args(args):
      - quality
      - print-src
      - destination
+     - history
     """
 
     global verbose
@@ -556,6 +583,7 @@ def apply_args(args):
     global video_quality
     global print_src
     global directory_prefix
+    global history_file
 
     # Enable verbose for debugging
     verbose = args.verbose
@@ -582,6 +610,12 @@ def apply_args(args):
             # Add trailing slash as the user might have forgotten it
             directory_prefix += '/'
             print_information("Added missing slash: " + directory_prefix, verbose_only=True)
+    
+    # Store where to read/print history
+    if args.history:
+        history_file = args.history
+        print_information("History file location: " + history_file, verbose_only= True)
+
 
 def setup_arg_parser():
     """Sets the parser up to handle all possible flags"""
@@ -609,6 +643,10 @@ def setup_arg_parser():
     parser.add_argument(
         "-f", "--file",
         help="A file with links to all the lectures you want to download. Each lecture link should be on a new line. See README.md for details."
+    )
+    parser.add_argument(
+        "-hs", "--history",
+        help="A file to which the scraper saves the IDs of downloaded videos to. The scraper will skip downloads if the corresponding ID exists in the specified file."
     )
     parser.add_argument(
         "-p", "--print-src",
@@ -723,11 +761,11 @@ for (link, user, password) in lecture_objects:
 print_information(video_src_collection, verbose_only=True)
 
 # Strip illegal characters:
-video_src_collection = [(remove_illegal_characters(file_name), video_src_link) for (file_name, video_src_link) in video_src_collection]
+video_src_collection = [(remove_illegal_characters(file_name), video_src_link, episode_name) for (file_name, video_src_link, episode_name) in video_src_collection]
 
 # Download selected episodes
-for (file_name, video_src_link) in video_src_collection:
-    downloader(file_name, video_src_link)
+for (file_name, video_src_link, episode_name) in video_src_collection:
+    downloader(file_name, video_src_link, episode_name)
 
 # Print summary and exit
 print_information(str(link_counter) + " files found, " + str(download_counter) + " downloaded and " + str(skip_counter) + " skipped")
