@@ -459,6 +459,7 @@ def check_connection():
         sys.exit(1)
 
 def report_bug():
+    """Opens GitLab issue page in browser"""
     print_information(gitlab_issue_page)
     try:
         input("Press enter to open the link in your browser or Ctrl+C to exit.")
