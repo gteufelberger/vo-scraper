@@ -367,7 +367,7 @@ def vo_scrapper(vo_link, user, passw):
         # If video and lecture title overlap, remove lecture title from video title
         if episode_title.startswith(lecture_title):
             episode_title = episode_title[len(lecture_title):]
-        
+
         # Extract episode name before adding the date to episode_title
         episode_name = item['createdAt'][:-6] + " " + lecture_title + episode_title
 
@@ -463,7 +463,7 @@ def downloader(file_name, video_src_link, episode_name):
             os.rename(file_name+".part", file_name)
             print_information("Downloaded file: " + episode_name)
             download_counter += 1
-        
+
         if history_file:
             # Regardless whether we just downloaded the file or it already exists on disk, we want to add it to the history file
             with open(history_file, "a") as file:
@@ -548,7 +548,7 @@ def read_links_from_file(file):
     links = list()
     if os.path.isfile(file):
         # Read provided file
-        with open (file, "r") as myfile:
+        with open(file, "r") as myfile:
             file_links = myfile.readlines()
 
         # Strip lines containing a `#` symbol as they are comments
@@ -610,7 +610,7 @@ def apply_args(args):
             # Add trailing slash as the user might have forgotten it
             directory_prefix += '/'
             print_information("Added missing slash: " + directory_prefix, verbose_only=True)
-    
+
     # Store where to read/print history
     if args.history:
         history_file = args.history
