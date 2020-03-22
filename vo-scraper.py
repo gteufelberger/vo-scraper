@@ -361,21 +361,21 @@ def vo_scrapper(vo_link, user, passw):
             print_information("Requested quality \"" + video_quality + "\" not available. Skipping episode!", type='error')
             continue
 
-        lecture_titel = vo_json_data['title']
+        lecture_title = vo_json_data['title']
         video_title   = vo_json_data["episodes"][item_nr]["title"]
 
         # If video and lecture title overlap, remove lecture title from video title
-        if video_title.startswith(lecture_titel):
-            video_title = video_title[len(lecture_titel):]
+        if video_title.startswith(lecture_title):
+            video_title = video_title[len(lecture_title):]
         
         # Extract episode name before adding the date to video_title
-        episode_name = item['createdAt'][:-6] + " " + lecture_titel + video_title
+        episode_name = item['createdAt'][:-6] + " " + lecture_title + video_title
 
         # Append date
         video_title = item['createdAt'][:-6]+video_title
 
         # Filename is `directory/<video date (YYYY-MM-DD)><leftovers from video title>-<quality>.mp4`
-        directory = directory_prefix + lecture_titel + os.sep
+        directory = directory_prefix + lecture_title + os.sep
         file_name = directory+video_title+"_"+video_quality+".mp4"
         print_information(file_name, verbose_only=True)
 
