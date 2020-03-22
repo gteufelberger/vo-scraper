@@ -650,6 +650,16 @@ def print_usage():
     print_information("")
     print_information("To see all possible arguments run \"python3 vo-scraper.py --help\"")
 
+def remove_illegal_characters(str):
+    """Removes characters that are deemed illegal in some file systems such as NTFS from the input string
+
+    Keyword arguments:
+    str -- The string from which to remove the characters
+    """
+    illegal_chars = '?<>:*|"^'
+    for c in illegal_chars:
+        str = str.replace(c,'')
+    return str
 
 # ===============================================================
 #  __  __           _
@@ -708,6 +718,12 @@ for (link, user, password) in lecture_objects:
     else:
         video_src_collection += vo_scrapper(link, user, password)
     print()
+
+# Print collected episodes
+print_information(video_src_collection, verbose_only=True)
+
+# Strip illegal characters:
+video_src_collection = [(remove_illegal_characters(file_name), video_src_link) for (file_name, video_src_link) in video_src_collection]
 
 # Download selected episodes
 for (file_name, video_src_link) in video_src_collection:
