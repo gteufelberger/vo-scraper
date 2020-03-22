@@ -362,21 +362,21 @@ def vo_scrapper(vo_link, user, passw):
             continue
 
         lecture_title = vo_json_data['title']
-        video_title   = vo_json_data["episodes"][item_nr]["title"]
+        episode_title   = vo_json_data["episodes"][item_nr]["title"]
 
         # If video and lecture title overlap, remove lecture title from video title
-        if video_title.startswith(lecture_title):
-            video_title = video_title[len(lecture_title):]
+        if episode_title.startswith(lecture_title):
+            episode_title = episode_title[len(lecture_title):]
         
-        # Extract episode name before adding the date to video_title
-        episode_name = item['createdAt'][:-6] + " " + lecture_title + video_title
+        # Extract episode name before adding the date to episode_title
+        episode_name = item['createdAt'][:-6] + " " + lecture_title + episode_title
 
         # Append date
-        video_title = item['createdAt'][:-6]+video_title
+        episode_title = item['createdAt'][:-6]+episode_title
 
         # Filename is `directory/<video date (YYYY-MM-DD)><leftovers from video title>-<quality>.mp4`
         directory = directory_prefix + lecture_title + os.sep
-        file_name = directory+video_title+"_"+video_quality+".mp4"
+        file_name = directory+episode_title+"_"+video_quality+".mp4"
         print_information(file_name, verbose_only=True)
 
         local_video_src_collection.append((file_name, video_src_link, episode_name))
