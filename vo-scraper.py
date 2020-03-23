@@ -679,6 +679,11 @@ def setup_arg_parser():
         action="store_true",
         help="Print additional debugging information."
     )
+    parser.add_argument(
+        "--version",
+        action="store_true",
+        help="Print version number and exit."
+    )
     return parser
 
 def print_usage():
@@ -714,6 +719,11 @@ def remove_illegal_characters(str):
 # Setup parser
 parser = setup_arg_parser()
 args = parser.parse_args()
+
+# Check for version flag
+if args.version:
+    print_information(program_version)
+    sys.exit()
 
 # Apply commands from input
 apply_args(args)
