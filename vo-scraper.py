@@ -716,67 +716,68 @@ def remove_illegal_characters(str):
 #
 # ===============================================================
 
-# Setup parser
-parser = setup_arg_parser()
-args = parser.parse_args()
+if __name__ == '__main__':
+    # Setup parser
+    parser = setup_arg_parser()
+    args = parser.parse_args()
 
-# Check for version flag
-if args.version:
-    print_information(program_version)
-    sys.exit()
+    # Check for version flag
+    if args.version:
+        print_information(program_version)
+        sys.exit()
 
-# Apply commands from input
-apply_args(args)
+    # Apply commands from input
+    apply_args(args)
 
-# Collect lecture links
-links = list()
-if args.file:
-    links += read_links_from_file(args.file)
+    # Collect lecture links
+    links = list()
+    if args.file:
+        links += read_links_from_file(args.file)
 
-# Append links passed through the command line:
-links += args.lecture_link
+    # Append links passed through the command line:
+    links += args.lecture_link
 
-# Extract username and password from "link"
-lecture_objects = list()
-lecture_objects +=  [tuple((link.split(' ') + ['',''])[:3]) for link in links] # This gives us tuples of size 3, where user and pw can be empty
+    # Extract username and password from "link"
+    lecture_objects = list()
+    lecture_objects +=  [tuple((link.split(' ') + ['',''])[:3]) for link in links] # This gives us tuples of size 3, where user and pw can be empty
 
-# Print basic usage and exit if no lecture links are passed
-if not links:
-    print_usage()
-    sys.exit()
+    # Print basic usage and exit if no lecture links are passed
+    if not links:
+        print_usage()
+        sys.exit()
 
-# Connection check
-if not args.skip_connection_check:
-    check_connection()
-else:
-    print_information("Connection check skipped.", verbose_only=True)
-
-# Update check
-if not args.skip_update_check:
-    check_update()
-else:
-    print_information("Update check skipped.", verbose_only=True)
-
-# Run scraper for every link provided to get video sources for each episode
-for (link, user, password) in lecture_objects:
-    print_information("Currently selected: " + link, verbose_only=True)
-    if "video.ethz.ch" not in link:
-        print_information("Looks like the provided link does not go to 'videos.ethz.ch' and has therefore been skipped. Make sure that it is correct: " + link, type='warning')
+    # Connection check
+    if not args.skip_connection_check:
+        check_connection()
     else:
-        video_src_collection += vo_scrapper(link, user, password)
-    print()
+        print_information("Connection check skipped.", verbose_only=True)
 
-# Print collected episodes
-print_information(video_src_collection, verbose_only=True)
+    # Update check
+    if not args.skip_update_check:
+        check_update()
+    else:
+        print_information("Update check skipped.", verbose_only=True)
 
-# Strip illegal characters:
-video_src_collection = [(remove_illegal_characters(file_name), video_src_link, episode_name) for (file_name, video_src_link, episode_name) in video_src_collection]
+    # Run scraper for every link provided to get video sources for each episode
+    for (link, user, password) in lecture_objects:
+        print_information("Currently selected: " + link, verbose_only=True)
+        if "video.ethz.ch" not in link:
+            print_information("Looks like the provided link does not go to 'videos.ethz.ch' and has therefore been skipped. Make sure that it is correct: " + link, type='warning')
+        else:
+            video_src_collection += vo_scrapper(link, user, password)
+        print()
 
-# Download selected episodes
-for (file_name, video_src_link, episode_name) in video_src_collection:
-    downloader(file_name, video_src_link, episode_name)
+    # Print collected episodes
+    print_information(video_src_collection, verbose_only=True)
 
-# Print summary and exit
-print_information(str(link_counter) + " files found, " + str(download_counter) + " downloaded and " + str(skip_counter) + " skipped")
-if platform == "win32":
-    input('\nEOF') # So Windows users also see the output (apparently)
+    # Strip illegal characters:
+    video_src_collection = [(remove_illegal_characters(file_name), video_src_link, episode_name) for (file_name, video_src_link, episode_name) in video_src_collection]
+
+    # Download selected episodes
+    for (file_name, video_src_link, episode_name) in video_src_collection:
+        downloader(file_name, video_src_link, episode_name)
+
+    # Print summary and exit
+    print_information(str(link_counter) + " files found, " + str(download_counter) + " downloaded and " + str(skip_counter) + " skipped")
+    if platform == "win32":
+        input('\nEOF') # So Windows users also see the output (apparently)
