@@ -51,11 +51,14 @@ gitlab_repo_page = "https://gitlab.ethz.ch/tgeorg/vo-scraper/"
 gitlab_issue_page = gitlab_repo_page+"issues"
 gitlab_changelog_page = gitlab_repo_page+"-/tags/v"
 remote_version_link = gitlab_repo_page+"raw/master/VERSION"
-program_version = '1.1'
+program_version = '1.2'
 
 # For web requests
 user_agent = 'Mozilla/5.0'
 cookie_jar = requests.cookies.RequestsCookieJar()
+
+# Store video sources in global list
+video_src_collection = list()
 
 # For stats
 link_counter = 0
@@ -65,21 +68,24 @@ skip_counter = 0
 #
 series_metadata_suffix = ".series-metadata.json"
 video_info_prefix = "https://video.ethz.ch/.episode-video.json?recordId="
-directory_prefix = "Lecture Recordings/"
+directory_prefix = "Lecture Recordings" + os.sep
 
 # Default quality
 video_quality = "high"
 
+# Boolean flags
 download_all = False
 verbose = False
-
 print_src = False
+
+# Location of text files
 file_to_print_src_to = ""
+history_file = ""
 
 quality_dict = {
-    'low'   : 0,
+    'high'  : 0,
     'medium': 1,
-    'high'  : 2
+    'low'   : 2
 }
 
 class bcolors:
@@ -207,8 +213,20 @@ def pretty_print_episodes(vo_json_data, selected):
     """Prints the episode numbers that match `selected`"""
     # Get length of longest strings for nice formatting when printing
     nr_length = len(" Nr.")
+    max_date_length = max([len(str(episode['createdAt'][:-6])) for episode in vo_json_data['episodes']])
     max_title_length = max([len(episode['title']) for episode in vo_json_data['episodes']])
     max_lecturer_length = max([len(str(episode['createdBy'])) for episode in vo_json_data['episodes']])
+
+    # Print header
+    print_information(
+        " Nr."
+        + " | " +
+        "Date".ljust(max_date_length)
+        + " | " +
+        "Name".ljust(max_title_length)
+        + " | " +
+        "Lecturer".ljust(max_lecturer_length)
+    )
 
     # Print the selected episodes
     for episode_nr in selected:
@@ -216,11 +234,11 @@ def pretty_print_episodes(vo_json_data, selected):
         print_information(
             "%3d".ljust(nr_length) % episode_nr
             + " | " +
+            episode['createdAt'][:-6].ljust(max_date_length)
+            + " | " +
             episode['title'].ljust(max_title_length)
             + " | " +
             str(episode['createdBy']).ljust(max_lecturer_length)
-            + " | " +
-            episode['createdAt'][:-6]
         )
 
 
@@ -228,12 +246,15 @@ def vo_scrapper(vo_link, user, passw):
     """
     Gets the list of all available videos for a lecture.
     Allows user to select multiple videos.
-    Afterwards passes the links to the video source to `downloader()`
+    Returns the selected episodes
 
     Keyword arguments:
     vo_link -- The link to the lecture
     user    -- The username passed from a text file
     passw   -- The password passed from a text file
+
+    Returns:
+    A tuple consisting out of the filename and the video_src_link
     """
     global user_agent
     global download_all
@@ -241,9 +262,6 @@ def vo_scrapper(vo_link, user, passw):
     global video_quality
     global quality_dict
     global cookie_jar
-
-    global print_src
-    global file_to_print_src_to
 
     global series_metadata_suffix
     global video_info_prefix
@@ -284,7 +302,7 @@ def vo_scrapper(vo_link, user, passw):
     # Print the user's choice
     if not choice:
         print_information("No videos selected")
-        return # Nothing to do anymore
+        return list() # Nothing to do anymore
     else:
         print_information("You selected:")
         pretty_print_episodes(vo_json_data, choice)
@@ -300,7 +318,9 @@ def vo_scrapper(vo_link, user, passw):
             print_information("Keyboard interrupt detected, skipping lecture", type='warning')
             return
 
-    # Collect links and download them
+    local_video_src_collection = list()
+
+    # Collect links for download
     for item_nr in choice:
         # Get link to video metadata json file
         item = vo_json_data['episodes'][item_nr]
@@ -331,88 +351,122 @@ def vo_scrapper(vo_link, user, passw):
             versions.append((counter, vid_version['res']['w']*vid_version['res']['h']))
             print_information(str(counter) + ": " + "%4d" %vid_version['res']['w'] + "x" + "%4d" %vid_version['res']['h'], verbose_only=True)
             counter += 1
-        versions.sort(key=lambda tup: tup[1])
-        # Now it's sorted: low -> medium -> high
+        versions.sort(key=lambda tup: tup[1], reverse=True)
+        # Now it's sorted: high -> medium -> low
 
         # Get video src url from json
-        video_src_link = video_json_data['streams'][0]['sources']['mp4'][versions[quality_dict[video_quality]][0]]['src']
+        try: # try/except block to handle cases were not all three types of quality exist
+            video_src_link = video_json_data['streams'][0]['sources']['mp4'][versions[quality_dict[video_quality]][0]]['src']
+        except IndexError:
+            print_information("Requested quality \"" + video_quality + "\" not available. Skipping episode!", type='error')
+            continue
 
-        lecture_titel = vo_json_data['title']
-        video_title   = vo_json_data["episodes"][item_nr]["title"]
+        lecture_title = vo_json_data['title']
+        episode_title   = vo_json_data["episodes"][item_nr]["title"]
 
         # If video and lecture title overlap, remove lecture title from video title
-        if video_title.startswith(lecture_titel):
-            video_title = video_title[len(lecture_titel):]
+        if episode_title.startswith(lecture_title):
+            episode_title = episode_title[len(lecture_title):]
+
+        # Extract episode name before adding the date to episode_title
+        episode_name = item['createdAt'][:-6] + " " + lecture_title + episode_title
+
         # Append date
-        video_title = item['createdAt'][:-6]+video_title
+        episode_title = item['createdAt'][:-6]+episode_title
+
+        # Filename is `directory/<video date (YYYY-MM-DD)><leftovers from video title>-<quality>.mp4`
+        directory = directory_prefix + lecture_title + os.sep
+        file_name = directory+episode_title+"_"+video_quality+".mp4"
+        print_information(file_name, verbose_only=True)
+
+        local_video_src_collection.append((file_name, video_src_link, episode_name))
+
+    return local_video_src_collection
+
+def downloader(file_name, video_src_link, episode_name):
+    """Downloads the video and gives progress information
+
+    Keyword arguments:
+    file_name      -- Name of the file to write the data to
+    video_src_link -- The link to download the data from
+    episode_name   -- Name of the episode
+    """
+    global download_counter
+    global skip_counter
+
+    global print_src
+    global file_to_print_src_to
+
+    # Check for print_src flag
+    if print_src:
+        # Print to file if given
+        if file_to_print_src_to:
+            print_information("Printing " + video_src_link + "to file: "+ file_to_print_src_to, verbose_only=True)
+            with open(file_to_print_src_to,"a") as f:
+                f.write(video_src_link+"\n")
+        else:
+            print_information(video_src_link)
+    # Otherwise download video
+    else:
+        print_information("Video source: " + video_src_link, verbose_only=True)
+
+        # Check history file (if one has been specified) whether episode has already been downloaded
+        if history_file:
+            try:
+                with open(history_file, "r") as file:
+                    if video_src_link in [line.rstrip('\n') for line in file.readlines()]:
+                        print("download skipped - file already recorded in history: " + episode_name)
+                        skip_counter += 1
+                        return
+                    else:
+                        print_information("Link has not yet been recorded in history file", verbose_only=True)
+            except FileNotFoundError:
+                print_information("No history file found at specified location: " + history_file, type='warning', verbose_only=True)
 
         # Create directory for video if it does not already exist
-        directory = directory_prefix + lecture_titel +"/"
+        directory = os.path.dirname(os.path.abspath(file_name))
         if not os.path.isdir(directory):
             os.makedirs(directory)
             print_information("This folder was generated: " + directory, verbose_only=True)
         else:
             print_information("This folder already exists: " + directory, verbose_only=True)
 
-        # Filename is `directory/<video date (YYYY-MM-DD)><leftovers from video title>-<quality>.mp4`
-        file_name = directory+video_title+"_"+video_quality+".mp4"
-        print_information(file_name, verbose_only=True)
-
-        # Check for print_src flag
-        if print_src:
-            # Print to file if given
-            if file_to_print_src_to:
-                print_information("Printing " + video_src_link + "to file: "+ file_to_print_src_to, verbose_only=True)
-                with open(file_to_print_src_to,"a") as f:
-                    f.write(video_src_link+"\n")
-            else:
-                print_information(video_src_link)
-        # Otherwise download video
+        # Check if file already exists
+        if os.path.isfile(file_name):
+            print_information("download skipped - file already exists: " + episode_name)
+            skip_counter += 1
+        # Otherwise download it
         else:
-            downloader(file_name, video_src_link)
+            # cf.: https://stackoverflow.com/questions/15644964/python-progress-bar-and-downloads
+            with open(file_name+".part", "wb") as f:
+                response = requests.get(video_src_link, stream=True)
+                total_length = response.headers.get('content-length')
 
-def downloader(file_name, video_src_link):
-    """Downloads the video and gives progress information
+                print_information("Downloading " + episode_name + " (%.2f" % (int(total_length)/1024/1024) + " MiB)")
 
-    Keyword arguments:
-    file_name      -- Name of the file to write the data to
-    video_src_link -- The link to download the data from
-    """
-    global download_counter
-    global skip_counter
+                if total_length is None: # We received no content length header
+                    f.write(response.content)
+                else:
+                    # Download file and show progress bar
+                    dl = 0
+                    total_length = int(total_length)
+                    for data in response.iter_content(chunk_size=4096):
+                        dl += len(data)
+                        f.write(data)
+                        done = int(50 * dl / total_length)
+                        sys.stdout.write("\r[%s%s]" % ('=' * done, ' ' * (50-done)) )
+                        sys.stdout.flush()
+            print()
 
-    print_information("Video source: " + video_src_link, verbose_only=True)
+            # Remove `.part` suffix from file name
+            os.rename(file_name+".part", file_name)
+            print_information("Downloaded file: " + episode_name)
+            download_counter += 1
 
-    # Check if file already exists
-    if os.path.isfile(file_name):
-        print_information("download skipped - file already exists: " + file_name.split('/')[-1])
-        skip_counter += 1
-    # Otherwise download it
-    else:
-        # cf.: https://stackoverflow.com/questions/15644964/python-progress-bar-and-downloads
-        with open(file_name+".part", "wb") as f:
-            response = requests.get(video_src_link, stream=True)
-            total_length = response.headers.get('content-length')
-
-            print_information("Downloading " + file_name.split('/')[-1] + " (%.2f" % (int(total_length)/1024/1024) + " MiB)")
-
-            if total_length is None: # We received no content length header
-                f.write(response.content)
-            else:
-                # Download file and show progress bar
-                dl = 0
-                total_length = int(total_length)
-                for data in response.iter_content(chunk_size=4096):
-                    dl += len(data)
-                    f.write(data)
-                    done = int(50 * dl / total_length)
-                    sys.stdout.write("\r[%s%s]" % ('=' * done, ' ' * (50-done)) )
-                    sys.stdout.flush()
-        print()
-
-        os.rename(file_name+".part", file_name)
-        print_information("Downloaded file: " + file_name.split('/')[-1])
-        download_counter += 1
+        if history_file:
+            # Regardless whether we just downloaded the file or it already exists on disk, we want to add it to the history file
+            with open(history_file, "a") as file:
+                file.write(video_src_link + '\n')
 
 def check_connection():
     """Checks connection to video.ethz.ch and if it fails then also to the internet"""
@@ -430,6 +484,7 @@ def check_connection():
         sys.exit(1)
 
 def report_bug():
+    """Opens GitLab issue page in browser"""
     print_information(gitlab_issue_page)
     try:
         input("Press enter to open the link in your browser or Ctrl+C to exit.")
@@ -492,14 +547,17 @@ def read_links_from_file(file):
     links = list()
     if os.path.isfile(file):
         # Read provided file
-        with open (file, "r") as myfile:
+        with open(file, "r") as myfile:
             file_links = myfile.readlines()
 
         # Strip lines containing a `#` symbol as they are comments
         file_links = [line for line in file_links if not line.startswith('#')]
 
-        # Strip newlines
+        # Strip newline characters
         file_links = [x.rstrip('\n') for x in file_links]
+
+        # Strip empty lines
+        file_links = [line for line in file_links if line]
 
         # Add links from file to the list of links to look at
         links += file_links
@@ -515,13 +573,17 @@ def apply_args(args):
      - all
      - quality
      - print-src
+     - destination
+     - history
     """
 
     global verbose
     global download_all
     global video_quality
-
     global print_src
+    global file_to_print_src_to
+    global directory_prefix
+    global history_file
 
     # Enable verbose for debugging
     verbose = args.verbose
@@ -539,6 +601,24 @@ def apply_args(args):
     # Check for printing flag
     if hasattr(args, 'print_src'):
         print_src=True
+        # Store where to print video source
+        if args.print_src:
+            file_to_print_src_to = args.print_src
+
+    # Check for destination flag
+    if args.destination:
+        directory_prefix = args.destination
+        print_information("The user passed directory is: " + directory_prefix, verbose_only=True)
+        if not directory_prefix.endswith(os.sep):
+            # Add trailing (back)slash as the user might have forgotten it
+            directory_prefix += os.sep
+            print_information("Added missing slash: " + directory_prefix, verbose_only=True)
+
+    # Store where to read/print history
+    if args.history:
+        history_file = args.history
+        print_information("History file location: " + history_file, verbose_only= True)
+
 
 def setup_arg_parser():
     """Sets the parser up to handle all possible flags"""
@@ -560,8 +640,16 @@ def setup_arg_parser():
         help="Print link to GitLab issue page and open it in browser."
     )
     parser.add_argument(
+        "-d", "--destination",
+        help="Directory where to save the files to. By default this is the folder \"Lecture Recordings/\" of the current working directory."
+    )
+    parser.add_argument(
         "-f", "--file",
         help="A file with links to all the lectures you want to download. Each lecture link should be on a new line. See README.md for details."
+    )
+    parser.add_argument(
+        "-hs", "--history",
+        help="A file to which the scraper saves the IDs of downloaded videos to. The scraper will skip downloads if the corresponding ID exists in the specified file."
     )
     parser.add_argument(
         "-p", "--print-src",
@@ -591,6 +679,11 @@ def setup_arg_parser():
         action="store_true",
         help="Print additional debugging information."
     )
+    parser.add_argument(
+        "--version",
+        action="store_true",
+        help="Print version number and exit."
+    )
     return parser
 
 def print_usage():
@@ -603,6 +696,16 @@ def print_usage():
     print_information("")
     print_information("To see all possible arguments run \"python3 vo-scraper.py --help\"")
 
+def remove_illegal_characters(str):
+    """Removes characters that are deemed illegal in some file systems such as NTFS from the input string
+
+    Keyword arguments:
+    str -- The string from which to remove the characters
+    """
+    illegal_chars = '?<>:*|"^'
+    for c in illegal_chars:
+        str = str.replace(c,'')
+    return str
 
 # ===============================================================
 #  __  __           _
@@ -613,56 +716,68 @@ def print_usage():
 #
 # ===============================================================
 
-# Setup parser
-parser = setup_arg_parser()
-args = parser.parse_args()
+if __name__ == '__main__':
+    # Setup parser
+    parser = setup_arg_parser()
+    args = parser.parse_args()
 
-# Apply commands from input
-apply_args(args)
+    # Check for version flag
+    if args.version:
+        print_information(program_version)
+        sys.exit()
 
-# Store where to print video source
-if print_src and args.print_src:
-    file_to_print_src_to = args.print_src
+    # Apply commands from input
+    apply_args(args)
 
-# Collect lecture links
-links = list()
-if args.file:
-    links += read_links_from_file(args.file)
+    # Collect lecture links
+    links = list()
+    if args.file:
+        links += read_links_from_file(args.file)
 
-# Append links passed through the command line:
-links += args.lecture_link
+    # Append links passed through the command line:
+    links += args.lecture_link
 
-# Extract username and password from "link"
-lecture_objects = list()
-lecture_objects +=  [tuple((link.split(' ') + ['',''])[:3]) for link in links] # This gives us tuples of size 3, where user and pw can be empty
+    # Extract username and password from "link"
+    lecture_objects = list()
+    lecture_objects +=  [tuple((link.split(' ') + ['',''])[:3]) for link in links] # This gives us tuples of size 3, where user and pw can be empty
 
-# Print basic usage and exit if no lecture links are passed
-if not links:
-    print_usage()
-    sys.exit()
+    # Print basic usage and exit if no lecture links are passed
+    if not links:
+        print_usage()
+        sys.exit()
 
-# Connection check
-if not args.skip_connection_check:
-    check_connection()
-else:
-    print_information("Connection check skipped.", verbose_only=True)
-
-# Update check
-if not args.skip_update_check:
-    check_update()
-else:
-    print_information("Update check skipped.", verbose_only=True)
-
-# Run scraper for every link provided
-for (link, user, password) in lecture_objects:
-    print_information("Currently selected: " + link, verbose_only=True)
-    if "video.ethz.ch" not in link:
-        print_information("Looks like the provided link does not go to 'videos.ethz.ch' and has therefore been skipped. Make sure that it is correct: " + link, type='warning')
+    # Connection check
+    if not args.skip_connection_check:
+        check_connection()
     else:
-        vo_scrapper(link, user, password)
-    print()
+        print_information("Connection check skipped.", verbose_only=True)
 
-# Print summary and exit
-print_information(str(link_counter) + " files found, " + str(download_counter) + " downloaded and " + str(skip_counter) + " skipped")
-if platform == "win32":
-    input('\nEOF') # So Windows users also see the output (apparently)
+    # Update check
+    if not args.skip_update_check:
+        check_update()
+    else:
+        print_information("Update check skipped.", verbose_only=True)
+
+    # Run scraper for every link provided to get video sources for each episode
+    for (link, user, password) in lecture_objects:
+        print_information("Currently selected: " + link, verbose_only=True)
+        if "video.ethz.ch" not in link:
+            print_information("Looks like the provided link does not go to 'videos.ethz.ch' and has therefore been skipped. Make sure that it is correct: " + link, type='warning')
+        else:
+            video_src_collection += vo_scrapper(link, user, password)
+        print()
+
+    # Print collected episodes
+    print_information(video_src_collection, verbose_only=True)
+
+    # Strip illegal characters:
+    video_src_collection = [(remove_illegal_characters(file_name), video_src_link, episode_name) for (file_name, video_src_link, episode_name) in video_src_collection]
+
+    # Download selected episodes
+    for (file_name, video_src_link, episode_name) in video_src_collection:
+        downloader(file_name, video_src_link, episode_name)
+
+    # Print summary and exit
+    print_information(str(link_counter) + " files found, " + str(download_counter) + " downloaded and " + str(skip_counter) + " skipped")
+    if platform == "win32":
+        input('\nEOF') # So Windows users also see the output (apparently)
