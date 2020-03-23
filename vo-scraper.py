@@ -421,8 +421,7 @@ def downloader(file_name, video_src_link, episode_name):
                     else:
                         print_information("Link has not yet been recorded in history file", verbose_only=True)
             except FileNotFoundError:
-                print_information("No history file found at specified location: " + history_file, verbose_only=True)
-                #TODO something here
+                print_information("No history file found at specified location: " + history_file, type='warning', verbose_only=True)
 
         # Create directory for video if it does not already exist
         directory = os.path.dirname(os.path.abspath(file_name))
