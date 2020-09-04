@@ -169,6 +169,7 @@ def acquire_login_cookie(protection, vo_link, user, passw):
 
             # Request login-cookie
             r = requests.post("https://video.ethz.ch/j_security_check", headers=headers, data=data)
+            print_information(f"Received response: {r.status_code}", verbose_only=True)
 
             # Put login cookie in cookie_jar
             cookie_jar = r.cookies
