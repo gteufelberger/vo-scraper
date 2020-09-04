@@ -164,7 +164,7 @@ def acquire_login_cookie(protection, vo_link, user, passw):
             (user, passw) = get_credentials(user, passw)
 
             # Setup headers and content to send
-            headers = { "Content-Type": "application/x-www-form-urlencoded", "CSRF-Token": "undefined", 'User-Agent': user_agent}
+            headers = {"User-Agent": user_agent, "Referer": vo_link+".html"}
             data = { "__charset__": "utf-8", "j_validate": True, "j_username": user, "j_password": passw}
 
             # Request login-cookie
