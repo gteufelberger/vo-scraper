@@ -32,6 +32,26 @@ To see a list of possible arguments check
 
 **For protected lectures** the vo-scraper will ask for your login credentials before downloading the video(s).
 
+### Q: How can I choose which episodes of a lecture to download?
+
+#### A: You will be prompted with the list of episodes available for downloading for each lecture.
+
+You can either specify single episodes by typing their indices separated by space, or add ranges in Haskell syntax, like `1..5` for `1 2 3 4`.
+Ranges are upper-bound-inclusive. Custom steps sizes are supported too, e.g. `1..3..10`
+
+You may find this example of ranges useful:
+
+| Range     | Equivalent      | In Words                                                                                  |
+|-----------|-----------------|-------------------------------------------------------------------------------------------|
+| `1..4`    | `1 2 3 4`       | Episode one to four                                                                       |
+| `..4`     | `0 1 2 3 4`     | All episodes up to four (the fifth)                                                       |
+| `3..`     | `3 4 5 6 [...]` | All episodes starting from three (the fourth)                                             |
+| `..`      | `0 1 2 3 [...]` | All episodes                                                                              |
+| `2..4..6` | `2 4 6`         | Every other episodes from two to six                                                      |
+| `..2..6`  | `0 2 4 6`       | Every other episodes until six (when I started paying attention)                          |
+| `1..3..`  | `1 3 5 [...]`   | Every other episodes starting from the second (i.e.. all the second episodes of the week) |
+| `..3..`   | `0 3 6 [...]`   | Every third episodes, starting from the beginning                                         |
+
 ### Q: How do I pass a file with links to multiple lectures?
 
 #### A: Use `--file <filename>`

@@ -51,7 +51,7 @@ gitlab_repo_page = "https://gitlab.ethz.ch/tgeorg/vo-scraper/"
 gitlab_issue_page = gitlab_repo_page+"issues"
 gitlab_changelog_page = gitlab_repo_page+"-/tags/v"
 remote_version_link = gitlab_repo_page+"raw/master/VERSION"
-program_version = '1.2'
+program_version = '1.2.1'
 
 # For web requests
 user_agent = 'Mozilla/5.0'
@@ -164,11 +164,12 @@ def acquire_login_cookie(protection, vo_link, user, passw):
             (user, passw) = get_credentials(user, passw)
 
             # Setup headers and content to send
-            headers = { "Content-Type": "application/x-www-form-urlencoded", "CSRF-Token": "undefined", 'User-Agent': user_agent}
+            headers = {"User-Agent": user_agent, "Referer": vo_link+".html"}
             data = { "__charset__": "utf-8", "j_validate": True, "j_username": user, "j_password": passw}
 
             # Request login-cookie
             r = requests.post("https://video.ethz.ch/j_security_check", headers=headers, data=data)
+            print_information(f"Received response: {r.status_code}", verbose_only=True)
 
             # Put login cookie in cookie_jar
             cookie_jar = r.cookies
@@ -241,6 +242,58 @@ def pretty_print_episodes(vo_json_data, selected):
             str(episode['createdBy']).ljust(max_lecturer_length)
         )
 
+def make_range(item, max_episode_number):
+    """
+
+    Keyword arguments:
+    item               -- a string in the form of 'x..z' or 'x..y..z'
+    max_episode_number -- The highest episode number to have an upperbound for the range of episodes
+    
+    Returns:
+    A range from x to z, with step size y, 1 if y wasn't provided
+    """
+    if len(item.split('..')) == 2:
+        # user passed something like 'x..z', so step size is 1
+        lower_bound, upper_bound = item.split('..')
+        step = 1 
+    else:
+        # user passed something like 'x..y..z', so step size is y
+        lower_bound, step, upper_bound = item.split('..')
+
+    # set the bounds to the outer limits if no number was passed
+    lower_bound = int(lower_bound) if lower_bound else 0
+    upper_bound = int(upper_bound) if upper_bound else max_episode_number
+
+    step = int(step)
+    return range(lower_bound, upper_bound+1, step)
+
+def get_user_choice(max_episode_number):
+    """
+    Prompts the user to pick multiple episodes and returns them
+
+    Keyword arguments:
+    max_episode_number -- The highest episode number to have an upperbound for the range of episodes
+    
+    Returns:
+    A list containg the user picked choices
+    """
+    # Prompt user
+    user_input = input(
+        "Enter numbers of the above lectures you want to download separated by space (e.g. 0 5 12 14)\nJust press enter if you don't want to download anything from this lecture\n"
+    ).split()
+    choice = list()
+    for elem in user_input:
+        if elem.isnumeric():
+            choice.append(int(elem))
+        else:
+            choice += make_range(elem, max_episode_number)
+    
+    # make elements of `choice` unique
+    choice = set(choice)   
+    # sort them, to download in order and not randomly
+    choice = sorted(choice)
+
+    return choice
 
 def vo_scrapper(vo_link, user, passw):
     """
@@ -291,10 +344,8 @@ def vo_scrapper(vo_link, user, passw):
     else:
         # Let user pick videos
         try:
-            choice = [int(x) for x in input(
-                "Enter numbers of the above lectures you want to download separated by space (e.g. 0 5 12 14)\nJust press enter if you don't want to download anything from this lecture\n"
-            ).split()]
-        except:
+            choice = get_user_choice(max(range(len(vo_json_data['episodes']))))
+        except KeyboardInterrupt:
             print()
             print_information("Exiting...")
             sys.exit()
