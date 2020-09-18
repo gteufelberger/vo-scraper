@@ -627,7 +627,7 @@ def apply_args(args):
      - bug
      - all
      - quality
-     - print-src
+     - print-source
      - destination
      - history
     """
@@ -707,7 +707,7 @@ def setup_arg_parser():
         help="A file to which the scraper saves the IDs of downloaded videos to. The scraper will skip downloads if the corresponding ID exists in the specified file."
     )
     parser.add_argument(
-        "-p", "--print-src",
+        "-p", "--print-source",
         metavar="FILE",
         nargs="?",
         default=argparse.SUPPRESS,
