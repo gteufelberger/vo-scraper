@@ -130,8 +130,7 @@ Getting a cookie with a valid token differs between videos that require a NETHZ 
 
 For NETHZ logins we need to send a POST request to `https://video.ethz.ch/j_security_check` with the following headers:
 
-    Content-Type: application/x-www-form-urlencoded
-    CSRF-Token: undefined
+    Referer: <lecture link>.html
     User-Agent: Mozilla/5.0
 
 as well as the following parametres:
