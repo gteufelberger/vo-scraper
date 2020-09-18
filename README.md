@@ -56,9 +56,10 @@ You may find this example of ranges useful:
 
 #### A: Use `--file <filename>`
 
-The file should have a single link for each new line. Lines starting with `#` will be ignored and can be used for comments. It should look something like this:
+The file should only have one link per line. Lines starting with `#` will be ignored and can be used for comments. Empty lines will also be ignored. It should look something like this:
 
     https://video.ethz.ch/lectures/<department>/<year>/<spring/autumn>/XXX-XXXX-XXL.html
+    
     # This is a comment
     https://video.ethz.ch/lectures/<department>/<year>/<spring/autumn>/XXX-XXXX-XXL.html
     ...
