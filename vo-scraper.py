@@ -704,6 +704,7 @@ def setup_arg_parser():
     )
     parser.add_argument(
         "-hs", "--history",
+        metavar="FILE",
         help="A file to which the scraper saves the IDs of downloaded videos to. The scraper will skip downloads if the corresponding ID exists in the specified file."
     )
     parser.add_argument(
