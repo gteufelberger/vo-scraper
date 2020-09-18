@@ -425,9 +425,13 @@ def vo_scrapper(vo_link, user, passw):
         # Append date
         episode_title = item['createdAt'][:-6]+episode_title
 
-        # Filename is `directory/<video date (YYYY-MM-DD)><leftovers from video title>_<quality>.mp4`
+        # Generate a pseudo hash by using part of the filename of the online version (which appears to be a UUID)
+        pseudo_hash = video_src_link.replace('https://oc-vp-dist-downloads.ethz.ch/mh_default_org/oaipmh-mmp/','')[:8]
+        print_information(pseudo_hash, verbose_only=True)
+
+        # Filename is `directory/<video date (YYYY-MM-DD)><leftovers from video title>_<quality>-<pseudo_hash>.mp4`
         directory = directory_prefix + lecture_title + os.sep
-        file_name = directory+episode_title+"_"+video_quality+".mp4"
+        file_name = directory+episode_title+"_"+video_quality+"-"+pseudo_hash+".mp4"
         print_information(file_name, verbose_only=True)
 
         local_video_src_collection.append((file_name, video_src_link, episode_name))
