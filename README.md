@@ -1,7 +1,3 @@
-#### ⚠ **Important**: In order to not overburden ETH servers during the current situation, I highly recommend only downloading videos outside of peak hours, i.e. early in the morning or late at night ⚠
-
-***
-
 # vo-scraper
 
 A python script for ETH students to download lecture videos from [video.ethz.ch](https://video.ethz.ch/).
@@ -56,9 +52,10 @@ You may find this example of ranges useful:
 
 #### A: Use `--file <filename>`
 
-The file should have a single link for each new line. Lines starting with `#` will be ignored and can be used for comments. It should look something like this:
+The file should only have one link per line. Lines starting with `#` will be ignored and can be used for comments. Empty lines will also be ignored. It should look something like this:
 
     https://video.ethz.ch/lectures/<department>/<year>/<spring/autumn>/XXX-XXXX-XXL.html
+    
     # This is a comment
     https://video.ethz.ch/lectures/<department>/<year>/<spring/autumn>/XXX-XXXX-XXL.html
     ...
@@ -130,8 +127,7 @@ Getting a cookie with a valid token differs between videos that require a NETHZ 
 
 For NETHZ logins we need to send a POST request to `https://video.ethz.ch/j_security_check` with the following headers:
 
-    Content-Type: application/x-www-form-urlencoded
-    CSRF-Token: undefined
+    Referer: <lecture link>.html
     User-Agent: Mozilla/5.0
 
 as well as the following parametres:
