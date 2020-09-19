@@ -75,6 +75,7 @@ video_quality = "high"
 
 # Boolean flags
 download_all = False
+download_latest = False
 verbose = False
 print_src = False
 
@@ -311,6 +312,7 @@ def vo_scrapper(vo_link, user, passw):
     """
     global user_agent
     global download_all
+    global download_latest
 
     global video_quality
     global quality_dict
@@ -341,6 +343,9 @@ def vo_scrapper(vo_link, user, passw):
     if download_all:
         # Add all available videos to the selected
         choice = list(range(len(vo_json_data['episodes'])))
+    elif download_latest:
+        # Only add newest video to the selected
+        choice = [0]
     else:
         # Let user pick videos
         try:
@@ -634,6 +639,7 @@ def apply_args(args):
 
     global verbose
     global download_all
+    global download_latest
     global video_quality
     global print_src
     global file_to_print_src_to
@@ -651,6 +657,7 @@ def apply_args(args):
 
     # Set global variable according to input
     download_all = args.all
+    download_latest = args.latest
     video_quality = args.quality
 
     # Check for printing flag
@@ -724,6 +731,11 @@ def setup_arg_parser():
         "-sc", "--skip-connection-check",
         action="store_true",
         help="Skip checking whether there's a connection to video.ethz.ch or the internet in general."
+    )
+    parser.add_argument(
+        "--latest",
+        action="store_true",
+        help="Only downloads the latest video from each passed lecture."
     )
     parser.add_argument(
         "-su", "--skip-update-check",
