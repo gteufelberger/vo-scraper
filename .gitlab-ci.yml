@@ -39,3 +39,15 @@ pwd-protected-recording:
     - python3 vo-scraper.py --quality low --latest --file $PWD_LINK_FILE
     # Compare checksums
     - echo $(sha1sum Lecture\ Recordings/Introduction\ to\ Machine\ Learning/2020-05-27\ -\ Tutorial_low-1898f0cc.mp4) | grep -q dce9f9aeb00693b6dbce49b113c10d2f84a29b70
+
+# Download 'ETH' protected video
+eth-protected-recording:
+  stage: tests
+  needs: [python-compile-test]
+  script:
+    # Install dependency
+    - pip3 install requests
+    # Download video
+    - python3 vo-scraper.py --quality low --latest --file $ETH_LINK_FILE
+    # Compare checksums
+    - echo $(sha1sum Lecture\ Recordings/Advanced\ Systems\ Lab/2020-03-19_low-fd29952f.mp4) | grep -q efd4a1779a29da08c0186ed6121fc10bfa7e8e83
