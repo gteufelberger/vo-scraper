@@ -27,3 +27,15 @@ unprotected-recording:
     - python3 vo-scraper.py --quality low --latest https://video.ethz.ch/lectures/d-infk/2020/spring/252-0028-00L.html
     # Compare checksums
     - echo $(sha1sum Lecture\ Recordings/Digital\ Design\ and\ Computer\ Architecture/2020-03-12_low-3ebf562d.mp4) | grep -q f80bcc1c215cebf64a4da7f9623406fb1309e512
+
+# Download 'PWD' protected video
+pwd-protected-recording:
+  stage: tests
+  needs: [python-compile-test]
+  script:
+    # Install dependency
+    - pip3 install requests
+    # Download video
+    - python3 vo-scraper.py --quality low --latest --file $PWD_LINK_FILE
+    # Compare checksums
+    - echo $(sha1sum Lecture\ Recordings/Introduction\ to\ Machine\ Learning/2020-05-27\ -\ Tutorial_low-1898f0cc.mp4) | grep -q dce9f9aeb00693b6dbce49b113c10d2f84a29b70
