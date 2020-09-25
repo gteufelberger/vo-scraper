@@ -53,7 +53,7 @@ eth-protected-recording:
     # Compare checksums
     - echo $(sha1sum Lecture\ Recordings/Advanced\ Systems\ Lab/2020-03-19_low-fd29952f.mp4) | grep -q efd4a1779a29da08c0186ed6121fc10bfa7e8e83
 
-# Test parameter file
+# Test default named parameter file
 default-parameter-file:
   stage: feature-test
   needs: [unprotected-recording]
