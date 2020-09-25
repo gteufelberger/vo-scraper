@@ -2,7 +2,7 @@ image: python:3.8-slim
 
 stages:
   - pre-test
-  - tests
+  - basic-download-test
 
 python-compile-test:
   stage: pre-test
@@ -18,7 +18,7 @@ ensure-same-version:
 
 # Download unprotected video
 unprotected-recording:
-  stage: tests
+  stage: basic-download-test
   needs: [python-compile-test]
   script:
     # Install dependency
@@ -30,7 +30,7 @@ unprotected-recording:
 
 # Download 'PWD' protected video
 pwd-protected-recording:
-  stage: tests
+  stage: basic-download-test
   needs: [python-compile-test]
   script:
     # Install dependency
@@ -42,7 +42,7 @@ pwd-protected-recording:
 
 # Download 'ETH' protected video
 eth-protected-recording:
-  stage: tests
+  stage: basic-download-test
   needs: [python-compile-test]
   script:
     # Install dependency
