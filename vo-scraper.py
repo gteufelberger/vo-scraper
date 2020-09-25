@@ -871,5 +871,3 @@ if __name__ == '__main__':
 
     # Print summary and exit
     print_information(str(link_counter) + " files found, " + str(download_counter) + " downloaded and " + str(skip_counter) + " skipped")
-    if platform == "win32":
-        input('\nEOF') # So Windows users also see the output (apparently)
