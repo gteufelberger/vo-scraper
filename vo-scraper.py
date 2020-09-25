@@ -249,14 +249,14 @@ def make_range(item, max_episode_number):
     Keyword arguments:
     item               -- a string in the form of 'x..z' or 'x..y..z'
     max_episode_number -- The highest episode number to have an upperbound for the range of episodes
-    
+
     Returns:
     A range from x to z, with step size y, 1 if y wasn't provided
     """
     if len(item.split('..')) == 2:
         # user passed something like 'x..z', so step size is 1
         lower_bound, upper_bound = item.split('..')
-        step = 1 
+        step = 1
     else:
         # user passed something like 'x..y..z', so step size is y
         lower_bound, step, upper_bound = item.split('..')
@@ -274,7 +274,7 @@ def get_user_choice(max_episode_number):
 
     Keyword arguments:
     max_episode_number -- The highest episode number to have an upperbound for the range of episodes
-    
+
     Returns:
     A list containg the user picked choices
     """
@@ -288,9 +288,9 @@ def get_user_choice(max_episode_number):
             choice.append(int(elem))
         else:
             choice += make_range(elem, max_episode_number)
-    
+
     # make elements of `choice` unique
-    choice = set(choice)   
+    choice = set(choice)
     # sort them, to download in order and not randomly
     choice = sorted(choice)
 
@@ -784,7 +784,7 @@ def remove_illegal_characters(str):
 #
 # ===============================================================
 
-if __name__ == '__main__':    
+if __name__ == '__main__':
     # Setup parser
     parser = setup_arg_parser()
     args = parser.parse_args()
