@@ -715,6 +715,11 @@ def setup_arg_parser():
         help="A file to which the scraper saves the IDs of downloaded videos to. The scraper will skip downloads if the corresponding ID exists in the specified file."
     )
     parser.add_argument(
+        "--latest",
+        action="store_true",
+        help="Only downloads the latest video from each passed lecture."
+    )
+    parser.add_argument(
         "-p", "--print-source",
         metavar="FILE",
         nargs="?",
@@ -731,11 +736,6 @@ def setup_arg_parser():
         "-sc", "--skip-connection-check",
         action="store_true",
         help="Skip checking whether there's a connection to video.ethz.ch or the internet in general."
-    )
-    parser.add_argument(
-        "--latest",
-        action="store_true",
-        help="Only downloads the latest video from each passed lecture."
     )
     parser.add_argument(
         "-su", "--skip-update-check",
@@ -784,7 +784,7 @@ def remove_illegal_characters(str):
 #
 # ===============================================================
 
-if __name__ == '__main__':
+if __name__ == '__main__':    
     # Setup parser
     parser = setup_arg_parser()
     args = parser.parse_args()
