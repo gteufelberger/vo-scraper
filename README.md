@@ -1,4 +1,4 @@
-# vo-scraper
+# vo-scraper 🎓🎥
 
 A python script for ETH students to download lecture videos from [video.ethz.ch](https://video.ethz.ch/).
 
