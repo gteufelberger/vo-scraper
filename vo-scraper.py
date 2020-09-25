@@ -637,7 +637,6 @@ def apply_args(args):
      - history
     """
 
-    global verbose
     global download_all
     global download_latest
     global video_quality
@@ -645,10 +644,6 @@ def apply_args(args):
     global file_to_print_src_to
     global directory_prefix
     global history_file
-
-    # Enable verbose for debugging
-    verbose = args.verbose
-    print_information("Verbose enabled", verbose_only=True)
 
     # Check if user wants to submit bug report and exit
     if(args.bug == True):
@@ -788,6 +783,10 @@ if __name__ == '__main__':
     # Setup parser
     parser = setup_arg_parser()
     args = parser.parse_args()
+
+    # Enable verbose for debugging
+    verbose = args.verbose
+    print_information("Verbose enabled", verbose_only=True)
 
     # Check for version flag
     if args.version:
