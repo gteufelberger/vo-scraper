@@ -82,6 +82,7 @@ print_src = False
 # Location of text files
 file_to_print_src_to = ""
 history_file = ""
+PARAMETER_FILE = "parameters.txt"
 
 quality_dict = {
     'high'  : 0,
@@ -715,6 +716,11 @@ def setup_arg_parser():
         help="Only downloads the latest video from each passed lecture."
     )
     parser.add_argument(
+        "--parameter-file",
+        metavar="FILE",
+        help="Pass the name of the file to read parameters from. If the flag is not set parser will try to read parameters from `parameters.txt`"
+    )
+    parser.add_argument(
         "-p", "--print-source",
         metavar="FILE",
         nargs="?",
@@ -792,6 +798,25 @@ if __name__ == '__main__':
     if args.version:
         print_information(program_version)
         sys.exit()
+
+    # If a parameter file was passed, use that instead of default
+    if args.parameter_file:
+        PARAMETER_FILE = args.parameter_file
+    # Read parameters if file exists
+    if os.path.isfile(PARAMETER_FILE):
+        with open(PARAMETER_FILE) as f:
+            # Read file and remove trailing whitespaces and newlines
+            parameters = [x.strip() for x in f.readlines()]
+            # Split strings with spaces
+            parameters = [words for segments in parameters for words in segments.split()]
+            # Add parameters list
+            sys.argv += parameters
+            # Parse args again as we might have added some
+            args = parser.parse_args()
+    else:
+        # Print when no parameter file was found
+        # If no `--parameter-file` was passsed, this only prints when verbosity is turned on
+        print_information("No parameter file found at location: "+PARAMETER_FILE, verbose_only=not bool(args.parameter_file), type='warning')
 
     # Apply commands from input
     apply_args(args)
