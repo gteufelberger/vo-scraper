@@ -79,6 +79,25 @@ Additionally you can also add a username and password at the end of the link sep
 
 **Note:** This is **NOT** recommended for your NETHZ account password for security reasons!
 
+### Q: I don't like having to pass all those parameters each time I download recordings. Is there a better way?
+
+#### A: Yes
+
+You can can create a file called `parameters.txt` in which you put all your parameters. As long as you keep it in the same directory in which you call the scraper, it will automatically detect the file and read the parameters from there.
+
+**Example:**
+
+If you create a file called `parameters.txt` with the following content
+
+```
+--all
+--quality low
+```
+
+and then run `python3 vo-scraper.py <some lecture link>` in that directory it will download all recordings (`--all`) from that lecture in low quality (`--quality low`) without you having to pass any parameters.
+
+If you want to use a different name for the parameter file, you can pass the parameter `--parameter-file <filename>`. Ironically, you cannot do this via `parameters.txt` :P
+
 ### <a name="how_it_works"></a> Q: How does it acquire the videos?
 
 #### A: Like so:
