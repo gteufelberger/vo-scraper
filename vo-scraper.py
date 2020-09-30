@@ -22,6 +22,7 @@ from sys import platform
 import json     # For handling json files
 import argparse # For parsing commandline arguments
 import getpass  # For getting the user password
+import random   # For selecting a random hint
 
 
 # Check whether `requests` is installed
@@ -102,6 +103,7 @@ print_type_dict = {
     'error'   : f"({bcolors.ERROR}ERR{bcolors.ENDC})"
 }
 
+HINT_LIST = []
 # ===============================================================
 #  _____                          _     _
 # |  ___|  _   _   _ __     ___  | |_  (_)   ___    _ __    ___
@@ -702,6 +704,11 @@ def setup_arg_parser():
         help="Directory where to save the files to. By default this is the folder \"Lecture Recordings/\" of the current working directory."
     )
     parser.add_argument(
+        "--disable-hints",
+        action="store_true",
+        help="If set no hints will be displayed if the scraper finished running"
+    )
+    parser.add_argument(
         "-f", "--file",
         help="A file with links to all the lectures you want to download. Each lecture link should be on a new line. See README.md for details."
     )
@@ -868,6 +875,10 @@ if __name__ == '__main__':
     # Download selected episodes
     for (file_name, video_src_link, episode_name) in video_src_collection:
         downloader(file_name, video_src_link, episode_name)
+
+    if not args.disable_hints and HINT_LIST:
+        print()
+        print("Hint:", random.choice(HINT_LIST))
 
     # Print summary and exit
     print_information(str(link_counter) + " files found, " + str(download_counter) + " downloaded and " + str(skip_counter) + " skipped")
