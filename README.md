@@ -48,6 +48,12 @@ You may find this example of ranges useful:
 | `1..3..`  | `1 3 5 [...]`   | Every other episodes starting from the second (i.e.. all the second episodes of the week) |
 | `..3..`   | `0 3 6 [...]`   | Every third episodes, starting from the beginning                                         |
 
+### Q: Can I use it to download live streams?
+
+#### A: No
+
+Downloading live streams is not supported.
+
 ### Q: How do I pass a file with links to multiple lectures?
 
 #### A: Use `--file <filename>`
