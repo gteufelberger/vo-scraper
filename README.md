@@ -54,6 +54,12 @@ You may find this example of ranges useful:
 
 Downloading live streams is not supported.
 
+### Q: Can I use it to download lecture recordings from other platforms (e.g. Zoom)?
+
+#### A: No
+
+Downloading is only supported for recorded lectures on [video.ethz.ch](https://video.ethz.ch/). Other platforms such as Zoom, Moodle, and Polybox are not supported.
+
 ### Q: How do I pass a file with links to multiple lectures?
 
 #### A: Use `--file <filename>`
