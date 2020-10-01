@@ -22,10 +22,10 @@ import sys
 import http.client
 from urllib.request import Request, urlopen
 from sys import platform
-import json     # For handling json files
-import argparse # For parsing commandline arguments
-import getpass  # For getting the user password
-import random   # For selecting a random hint
+import json      # For handling json files
+import argparse  # For parsing commandline arguments
+import getpass   # For getting the user password
+import random    # For selecting a random hint
 
 
 # Check whether `requests` is installed
@@ -89,9 +89,9 @@ history_file = ""
 PARAMETER_FILE = "parameters.txt"
 
 quality_dict = {
-    'high'  : 0,
+    'high': 0,
     'medium': 1,
-    'low'   : 2
+    'low': 2
 }
 
 
@@ -103,9 +103,9 @@ class bcolors:
 
 
 print_type_dict = {
-    'info'    : f"({bcolors.INFO}INF{bcolors.ENDC})",
-    'warning' : f"({bcolors.WARNING}WRN{bcolors.ENDC})",
-    'error'   : f"({bcolors.ERROR}ERR{bcolors.ENDC})"
+    'info': f"({bcolors.INFO}INF{bcolors.ENDC})",
+    'warning': f"({bcolors.WARNING}WRN{bcolors.ENDC})",
+    'error': f"({bcolors.ERROR}ERR{bcolors.ENDC})"
 }
 
 HINT_LIST = []
