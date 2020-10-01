@@ -19,7 +19,6 @@ Check README.md and LICENSE before using this program.
 import urllib.request
 import os
 import sys
-import http.client
 from urllib.request import Request, urlopen
 from sys import platform
 import json      # For handling json files
