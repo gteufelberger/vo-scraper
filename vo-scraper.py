@@ -37,7 +37,7 @@ except:
 
 # Check whether `webbrowser` is installed
 try:
-    import webbrowser # only used to open the user's browser when reporting a bug
+    import webbrowser  # only used to open the user's browser when reporting a bug
 except:
     print_information("Failed to import `webbrowser`. It is however not required for downloading videos", type='warning')
 
@@ -94,11 +94,13 @@ quality_dict = {
     'low'   : 2
 }
 
+
 class bcolors:
     INFO = '\033[94m'
     ERROR = '\033[91m'
     WARNING = '\033[93m'
     ENDC = '\033[0m'
+
 
 print_type_dict = {
     'info'    : f"({bcolors.INFO}INF{bcolors.ENDC})",
@@ -115,6 +117,7 @@ HINT_LIST = []
 # |_|      \__,_| |_| |_|  \___|  \__| |_|  \___/  |_| |_| |___/
 #
 # ===============================================================
+
 
 def print_information(str, type='info', verbose_only=False):
     """Print provided string.
@@ -137,6 +140,7 @@ def print_information(str, type='info', verbose_only=False):
         # Always print with tag
         print(print_type_dict[type], str)
 
+
 def get_credentials(user, passw):
     """Gets user credentials and returns them
 
@@ -150,6 +154,7 @@ def get_credentials(user, passw):
         passw = getpass.getpass()
 
     return(user, passw)
+
 
 def acquire_login_cookie(protection, vo_link, user, passw):
     """Gets login-cookie by sending user credentials to login server
@@ -184,7 +189,7 @@ def acquire_login_cookie(protection, vo_link, user, passw):
                 break
             else:
                 print_information("Wrong username or password, please try again", type='warning')
-                (user, passw) = ('', '') # Reset passed credentials to not end up in loop if wrong credentials were passed
+                (user, passw) = ('', '')  # Reset passed credentials to not end up in loop if wrong credentials were passed
 
     elif protection == "PWD":
         print_information("This lecture requires a CUSTOM login. Check the lecture's website or your emails for the credentials.")
@@ -205,7 +210,7 @@ def acquire_login_cookie(protection, vo_link, user, passw):
                 break
             else:
                 print_information("Wrong username or password, please try again", type='warning')
-                (user, passw) = ('', '') # Reset passed credentials to not end up in loop if wrong credentials were passed
+                (user, passw) = ('', '')  # Reset passed credentials to not end up in loop if wrong credentials were passed
 
     else:
         print_information("Unknown protection type: " + protection, type='error')
@@ -216,6 +221,7 @@ def acquire_login_cookie(protection, vo_link, user, passw):
     print_information(cookie_jar, verbose_only=True)
 
     return cookie_jar
+
 
 def pretty_print_episodes(vo_json_data, selected):
     """Prints the episode numbers that match `selected`"""
@@ -249,6 +255,7 @@ def pretty_print_episodes(vo_json_data, selected):
             str(episode['createdBy']).ljust(max_lecturer_length)
         )
 
+
 def make_range(item, max_episode_number):
     """
 
@@ -273,6 +280,7 @@ def make_range(item, max_episode_number):
 
     step = int(step)
     return range(lower_bound, upper_bound + 1, step)
+
 
 def get_user_choice(max_episode_number):
     """
@@ -301,6 +309,7 @@ def get_user_choice(max_episode_number):
     choice = sorted(choice)
 
     return choice
+
 
 def vo_scrapper(vo_link, user, passw):
     """
@@ -364,7 +373,7 @@ def vo_scrapper(vo_link, user, passw):
     # Print the user's choice
     if not choice:
         print_information("No videos selected")
-        return list() # Nothing to do anymore
+        return list()  # Nothing to do anymore
     else:
         print_information("You selected:")
         pretty_print_episodes(vo_json_data, choice)
@@ -404,7 +413,6 @@ def vo_scrapper(vo_link, user, passw):
             continue
         video_json_data = json.loads(r.text)
 
-
         # Put available versions in list for sorting by video quality
         counter = 0
         versions = list()
@@ -417,7 +425,7 @@ def vo_scrapper(vo_link, user, passw):
         # Now it's sorted: high -> medium -> low
 
         # Get video src url from json
-        try: # try/except block to handle cases were not all three types of quality exist
+        try:  # try/except block to handle cases were not all three types of quality exist
             video_src_link = video_json_data['streams'][0]['sources']['mp4'][versions[quality_dict[video_quality]][0]]['src']
         except IndexError:
             print_information("Requested quality \"" + video_quality + "\" not available. Skipping episode!", type='error')
@@ -448,6 +456,7 @@ def vo_scrapper(vo_link, user, passw):
         local_video_src_collection.append((file_name, video_src_link, episode_name))
 
     return local_video_src_collection
+
 
 def downloader(file_name, video_src_link, episode_name):
     """Downloads the video and gives progress information
@@ -510,7 +519,7 @@ def downloader(file_name, video_src_link, episode_name):
 
                 print_information("Downloading " + episode_name + " (%.2f" % (int(total_length) / 1024 / 1024) + " MiB)")
 
-                if total_length is None: # We received no content length header
+                if total_length is None:  # We received no content length header
                     f.write(response.content)
                 else:
                     # Download file and show progress bar
@@ -534,6 +543,7 @@ def downloader(file_name, video_src_link, episode_name):
             with open(history_file, "a") as file:
                 file.write(video_src_link + '\n')
 
+
 def check_connection():
     """Checks connection to video.ethz.ch and if it fails then also to the internet"""
     try:
@@ -549,6 +559,7 @@ def check_connection():
             print_information("There seems to be no internet connection - please connect to the internet and try again.", type='error')
         sys.exit(1)
 
+
 def report_bug():
     """Opens GitLab issue page in browser"""
     print_information(gitlab_issue_page)
@@ -560,9 +571,11 @@ def report_bug():
     print_information("Exiting...")
     sys.exit(0)
 
+
 def version_tuple(version):
     """Takes a string and turns into an integer tuple, splitting on `.`"""
     return tuple(map(int, (version.split('.'))))
+
 
 def check_update():
     """
@@ -580,11 +593,10 @@ def check_update():
         r = requests.get(remote_version_link)
         remote_version_string = r.text
 
-        if r.status_code == 200: # Loading the version number succeeded
+        if r.status_code == 200:  # Loading the version number succeeded
 
             remote_version = version_tuple(remote_version_string)
             local_version = version_tuple(program_version)
-
 
             if remote_version > local_version:
                 # There's an update available, prompt the user
@@ -598,11 +610,12 @@ def check_update():
                 # We are up to date
                 print_information("Scraper is up to date according to version number in remote repo.", verbose_only=True)
         else:
-            raise Exception # We couldn't get the file for some reason
+            raise Exception  # We couldn't get the file for some reason
     except:
         # Update check failed
         print_information("Update check failed, skipping...", type='warning')
         # Note: We don't want the scraper to fail because it couldn't check for a new version so we continue regardless
+
 
 def read_links_from_file(file):
     """Reads the links from a text file
@@ -630,6 +643,7 @@ def read_links_from_file(file):
     else:
         print_information("No file with name \"" + file + "\" found", type='error')
     return links
+
 
 def apply_args(args):
     """Applies the provided command line arguments
@@ -765,6 +779,7 @@ def setup_arg_parser():
     )
     return parser
 
+
 def print_usage():
     """Prints basic usage of parser and gives examples"""
     print_information("You haven't added any lecture links! To download a lecture video you need to pass a link to the lecture, e.g.:")
@@ -774,6 +789,7 @@ def print_usage():
     print_information("    \"python3 vo-scraper.py --quality low --all https://video.ethz.ch/lectures/d-infk/2019/spring/252-0028-00L.html\"")
     print_information("")
     print_information("To see all possible arguments run \"python3 vo-scraper.py --help\"")
+
 
 def remove_illegal_characters(str):
     """Removes characters that are deemed illegal in some file systems such as NTFS from the input string
@@ -794,6 +810,7 @@ def remove_illegal_characters(str):
 # |_|  |_|  \__,_| |_| |_| |_|
 #
 # ===============================================================
+
 
 if __name__ == '__main__':
     # Setup parser
