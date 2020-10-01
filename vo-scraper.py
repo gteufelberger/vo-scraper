@@ -16,7 +16,10 @@ Check README.md and LICENSE before using this program.
 # ========================================================================
 
 # Import urllib.request, urllib.parse, os, sys, http.client
-import urllib.request, os, sys, http.client
+import urllib.request
+import os
+import sys
+import http.client
 from urllib.request import Request, urlopen
 from sys import platform
 import json     # For handling json files
@@ -49,9 +52,9 @@ except:
 
 # Links to repo
 gitlab_repo_page = "https://gitlab.ethz.ch/tgeorg/vo-scraper/"
-gitlab_issue_page = gitlab_repo_page+"issues"
-gitlab_changelog_page = gitlab_repo_page+"-/tags/v"
-remote_version_link = gitlab_repo_page+"raw/master/VERSION"
+gitlab_issue_page = gitlab_repo_page + "issues"
+gitlab_changelog_page = gitlab_repo_page + "-/tags/v"
+remote_version_link = gitlab_repo_page + "raw/master/VERSION"
 program_version = '1.3.0'
 
 # For web requests
@@ -132,7 +135,7 @@ def print_information(str, type='info', verbose_only=False):
             print(print_type_dict[type], str)
     elif verbose:
         # Always print with tag
-        print(print_type_dict[type],str)
+        print(print_type_dict[type], str)
 
 def get_credentials(user, passw):
     """Gets user credentials and returns them
@@ -142,7 +145,7 @@ def get_credentials(user, passw):
     passw -- The password passed from a text file
     """
     if not user:
-        user  = input("Enter your username: ")
+        user = input("Enter your username: ")
     if not passw:
         passw = getpass.getpass()
 
@@ -168,8 +171,8 @@ def acquire_login_cookie(protection, vo_link, user, passw):
             (user, passw) = get_credentials(user, passw)
 
             # Setup headers and content to send
-            headers = {"User-Agent": user_agent, "Referer": vo_link+".html"}
-            data = { "__charset__": "utf-8", "j_validate": True, "j_username": user, "j_password": passw}
+            headers = {"User-Agent": user_agent, "Referer": vo_link + ".html"}
+            data = {"__charset__": "utf-8", "j_validate": True, "j_username": user, "j_password": passw}
 
             # Request login-cookie
             r = requests.post("https://video.ethz.ch/j_security_check", headers=headers, data=data)
@@ -190,11 +193,11 @@ def acquire_login_cookie(protection, vo_link, user, passw):
             (user, passw) = get_credentials(user, passw)
 
             # Setup headers and content to send
-            headers = {"Referer": vo_link+".html", "User-Agent":user_agent}
-            data = { "__charset__": "utf-8", "username": user, "password": passw }
+            headers = {"Referer": vo_link + ".html", "User-Agent": user_agent}
+            data = {"__charset__": "utf-8", "username": user, "password": passw}
 
             # Get login cookie
-            r = requests.post(vo_link+".series-login.json", headers=headers, data=data)
+            r = requests.post(vo_link + ".series-login.json", headers=headers, data=data)
 
             # Put login cookie in cookie_jar
             cookie_jar = r.cookies
@@ -269,7 +272,7 @@ def make_range(item, max_episode_number):
     upper_bound = int(upper_bound) if upper_bound else max_episode_number
 
     step = int(step)
-    return range(lower_bound, upper_bound+1, step)
+    return range(lower_bound, upper_bound + 1, step)
 
 def get_user_choice(max_episode_number):
     """
@@ -383,7 +386,7 @@ def vo_scrapper(vo_link, user, passw):
     for item_nr in choice:
         # Get link to video metadata json file
         item = vo_json_data['episodes'][item_nr]
-        video_info_link = video_info_prefix+item['id']
+        video_info_link = video_info_prefix + item['id']
 
         # Download the video metadata file
         # Use login-cookie if provided otherwise make request without cookie
@@ -407,8 +410,8 @@ def vo_scrapper(vo_link, user, passw):
         versions = list()
         print_information("Available versions:", verbose_only=True)
         for vid_version in video_json_data['streams'][0]['sources']['mp4']:
-            versions.append((counter, vid_version['res']['w']*vid_version['res']['h']))
-            print_information(str(counter) + ": " + "%4d" %vid_version['res']['w'] + "x" + "%4d" %vid_version['res']['h'], verbose_only=True)
+            versions.append((counter, vid_version['res']['w'] * vid_version['res']['h']))
+            print_information(str(counter) + ": " + "%4d" % vid_version['res']['w'] + "x" + "%4d" % vid_version['res']['h'], verbose_only=True)
             counter += 1
         versions.sort(key=lambda tup: tup[1], reverse=True)
         # Now it's sorted: high -> medium -> low
@@ -421,7 +424,7 @@ def vo_scrapper(vo_link, user, passw):
             continue
 
         lecture_title = vo_json_data['title']
-        episode_title   = vo_json_data["episodes"][item_nr]["title"]
+        episode_title = vo_json_data["episodes"][item_nr]["title"]
 
         # If video and lecture title overlap, remove lecture title from video title
         if episode_title.startswith(lecture_title):
@@ -431,15 +434,15 @@ def vo_scrapper(vo_link, user, passw):
         episode_name = item['createdAt'][:-6] + " " + lecture_title + episode_title
 
         # Append date
-        episode_title = item['createdAt'][:-6]+episode_title
+        episode_title = item['createdAt'][:-6] + episode_title
 
         # Generate a pseudo hash by using part of the filename of the online version (which appears to be a UUID)
-        pseudo_hash = video_src_link.replace('https://oc-vp-dist-downloads.ethz.ch/mh_default_org/oaipmh-mmp/','')[:8]
+        pseudo_hash = video_src_link.replace('https://oc-vp-dist-downloads.ethz.ch/mh_default_org/oaipmh-mmp/', '')[:8]
         print_information(pseudo_hash, verbose_only=True)
 
         # Filename is `directory/<video date (YYYY-MM-DD)><leftovers from video title>_<quality>-<pseudo_hash>.mp4`
         directory = directory_prefix + lecture_title + os.sep
-        file_name = directory+episode_title+"_"+video_quality+"-"+pseudo_hash+".mp4"
+        file_name = directory + episode_title + "_" + video_quality + "-" + pseudo_hash + ".mp4"
         print_information(file_name, verbose_only=True)
 
         local_video_src_collection.append((file_name, video_src_link, episode_name))
@@ -464,9 +467,9 @@ def downloader(file_name, video_src_link, episode_name):
     if print_src:
         # Print to file if given
         if file_to_print_src_to:
-            print_information("Printing " + video_src_link + "to file: "+ file_to_print_src_to, verbose_only=True)
-            with open(file_to_print_src_to,"a") as f:
-                f.write(video_src_link+"\n")
+            print_information("Printing " + video_src_link + "to file: " + file_to_print_src_to, verbose_only=True)
+            with open(file_to_print_src_to, "a") as f:
+                f.write(video_src_link + "\n")
         else:
             print_information(video_src_link)
     # Otherwise download video
@@ -501,11 +504,11 @@ def downloader(file_name, video_src_link, episode_name):
         # Otherwise download it
         else:
             # cf.: https://stackoverflow.com/questions/15644964/python-progress-bar-and-downloads
-            with open(file_name+".part", "wb") as f:
+            with open(file_name + ".part", "wb") as f:
                 response = requests.get(video_src_link, stream=True)
                 total_length = response.headers.get('content-length')
 
-                print_information("Downloading " + episode_name + " (%.2f" % (int(total_length)/1024/1024) + " MiB)")
+                print_information("Downloading " + episode_name + " (%.2f" % (int(total_length) / 1024 / 1024) + " MiB)")
 
                 if total_length is None: # We received no content length header
                     f.write(response.content)
@@ -517,12 +520,12 @@ def downloader(file_name, video_src_link, episode_name):
                         dl += len(data)
                         f.write(data)
                         done = int(50 * dl / total_length)
-                        sys.stdout.write("\r[%s%s]" % ('=' * done, ' ' * (50-done)) )
+                        sys.stdout.write("\r[%s%s]" % ('=' * done, ' ' * (50 - done)))
                         sys.stdout.flush()
             print()
 
             # Remove `.part` suffix from file name
-            os.rename(file_name+".part", file_name)
+            os.rename(file_name + ".part", file_name)
             print_information("Downloaded file: " + episode_name)
             download_counter += 1
 
@@ -585,10 +588,10 @@ def check_update():
 
             if remote_version > local_version:
                 # There's an update available, prompt the user
-                print_information("A new version of the VO-scraper is available: " + '.'.join(map(str,remote_version)), type='warning')
-                print_information("You have version: " + '.'.join(map(str,local_version)), type='warning')
+                print_information("A new version of the VO-scraper is available: " + '.'.join(map(str, remote_version)), type='warning')
+                print_information("You have version: " + '.'.join(map(str, local_version)), type='warning')
                 print_information("You can download the new version from here: " + gitlab_repo_page, type='warning')
-                print_information("The changelog can be found here: " + gitlab_changelog_page + '.'.join(map(str,remote_version)), type='warning')
+                print_information("The changelog can be found here: " + gitlab_changelog_page + '.'.join(map(str, remote_version)), type='warning')
                 print_information("Press enter to continue with the current version", type='warning')
                 input()
             else:
@@ -625,7 +628,7 @@ def read_links_from_file(file):
         # Add links from file to the list of links to look at
         links += file_links
     else:
-        print_information("No file with name \"" + file +"\" found", type='error')
+        print_information("No file with name \"" + file + "\" found", type='error')
     return links
 
 def apply_args(args):
@@ -660,7 +663,7 @@ def apply_args(args):
 
     # Check for printing flag
     if hasattr(args, 'print_src'):
-        print_src=True
+        print_src = True
         # Store where to print video source
         if args.print_src:
             file_to_print_src_to = args.print_src
@@ -677,7 +680,7 @@ def apply_args(args):
     # Store where to read/print history
     if args.history:
         history_file = args.history
-        print_information("History file location: " + history_file, verbose_only= True)
+        print_information("History file location: " + history_file, verbose_only=True)
 
 
 def setup_arg_parser():
@@ -736,7 +739,7 @@ def setup_arg_parser():
     )
     parser.add_argument(
         "-q", "--quality",
-        choices=['high','medium','low'],
+        choices=['high', 'medium', 'low'],
         default='high',
         help="Select video quality. Accepted values are \"high\" (1920x1080), \"medium\" (1280x720), and \"low\" (640x360). Default is \"high\""
     )
@@ -780,7 +783,7 @@ def remove_illegal_characters(str):
     """
     illegal_chars = '?<>:*|"^'
     for c in illegal_chars:
-        str = str.replace(c,'')
+        str = str.replace(c, '')
     return str
 
 # ===============================================================
@@ -823,7 +826,7 @@ if __name__ == '__main__':
     else:
         # Print when no parameter file was found
         # If no `--parameter-file` was passsed, this only prints when verbosity is turned on
-        print_information("No parameter file found at location: "+PARAMETER_FILE, verbose_only=not bool(args.parameter_file), type='warning')
+        print_information("No parameter file found at location: " + PARAMETER_FILE, verbose_only=not bool(args.parameter_file), type='warning')
 
     # Apply commands from input
     apply_args(args)
@@ -838,7 +841,7 @@ if __name__ == '__main__':
 
     # Extract username and password from "link"
     lecture_objects = list()
-    lecture_objects +=  [tuple((link.split(' ') + ['',''])[:3]) for link in links] # This gives us tuples of size 3, where user and pw can be empty
+    lecture_objects += [tuple((link.split(' ') + ['', ''])[:3]) for link in links]  # This gives us tuples of size 3, where user and pw can be empty
 
     # Print basic usage and exit if no lecture links are passed
     if not links:
