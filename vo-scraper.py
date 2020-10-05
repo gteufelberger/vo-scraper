@@ -107,7 +107,84 @@ print_type_dict = {
     'error': f"({bcolors.ERROR}ERR{bcolors.ENDC})"
 }
 
-HINT_LIST = []
+HINT_LIST = [
+    # --help
+    """Want to know more about the scrapers functionality?
+Run `python3 vo-scraper.py --help` to see all commands that can be used with the scraper.
+For a detailed explanation of some of the commands, checkout the README here: https://gitlab.ethz.ch/tgeorg/vo-scraper
+""",
+    # --all
+    """Want to download all recordings of a lecture at once?
+If you call the vo-scraper with `--all` it will skip the selection screen and will download all recordings instead.
+Usage example:
+
+    python3 vo-scraper.py --all https://video.ethz.ch/lectures/d-infk/2019/spring/252-0028-00L.html
+""",
+    # --bug
+    """Found a bug?
+Run `python3 vo-scraper.py --bug` or report it directly at https://gitlab.ethz.ch/tgeorg/vo-scraper/issues
+""",
+    # --destination DESTINATION
+    """Did you know? By default the vo-scraper saves the dowloaded recordings in""" + directory_prefix + """<name of lecture>
+If you want the recordings saved in a different place you can use the parameter `--destination <your folder>`
+For example:
+
+    python3 vo-scraper.py --destination my_folder https://video.ethz.ch/lectures/d-infk/2019/spring/252-0028-00L.html
+
+saves the recordings inside the folder name \"my_folder\"
+""",
+    # --disable-hints
+    """Getting annoyed by this hint message?
+You can pass the parameter `--disable-hints` to not show hints after running.
+""",
+    # --file FILE
+    """Downloading multiple lectures and tired of having to enter all those links everytime you want to download a recording?
+You can paste all your links in a text file and then tell the scraper to read from that file using the paramter `--file <your text file>`
+Example:
+
+    python3 vo-scraper.py --file my_lectures.txt
+
+The scraper will read the links from that file and download them as usual.
+""",
+    # --history FILE
+    """Did you know, that the scraper does not re-download a lecture recording if it detects the recording in its download folder?
+This way bandwidth is safed by preventing unecessary re-downloads, especially when using the `--all` parameter to download all existing recordings of a lecture.
+However this also mean that if you delete the recording and run the scraper with `--all` again it will re-download the recording.
+
+To fix this you can use the parameter `--history <some filename>` which creates a text file with that name and stores a history of all downloaded lectures there.
+For example:
+
+    python3 vo-scraper.py --history history.txt <your links>
+
+will create a file called 'history.txt' and save a history of all downloaded recordings there. If you delete a downloaded video the scraper will not redownload it as long as you pass `--history <filename> every time you run it.`
+""",
+    # --parameter-file FILE
+    """Annoyed by having to type all those parameters like `--all`, `--history`, etc. by hand?
+You can create a text file called \"""" + PARAMETER_FILE + """\" and paste all your parameters there. If it's in the same location as the scraper it will automatically read it and apply them.
+
+If you want to use a different name for it, you can pass `--parameter-file <your filename>` to read parameters from `<your filename>` instead.
+Ironically this parameter cannot be put into the parameter file.
+""",
+    # --print-source [FILE]
+    """Have your own method of downloading videos?
+You can use the parameter `--print-source` to print the direct links to the recordings instead of downloading them.
+By default the links are printed in your terminal. If you follow up the parameter with a file e.g. `--print-source video_links.txt` a file with that name is created and all the links are aved there.
+""",
+    # --quality {high,medium,low}
+    """Downloading recordings takes too long as the files are too big?
+You can download switch between different video qualities using the `--quality` parameter together with the keyword 'high', 'low', or 'medium'
+Example:
+
+    python3 vo-scraper.py --quality high https://video.ethz.ch/lectures/d-infk/2019/spring/252-0028-00L.html
+
+Note that the default quality is 'high', so if you just want the highest possible quality, there's no need to pass this parameter.
+""",
+    # --skip-connection-check
+    # --skip-update-check
+    """In order to ensure functionality, the scraper will check whether your version is up to date and that you have a connection to video.ethz.ch (as well as the internet if video.ethz.ch fails).
+If you don't like this, you can pass the parameter `--skip-update-check` to prevent looking for updates and `--skip-connection-check` to prevent checking for an internet connection.
+""",
+]
 # ===============================================================
 #  _____                          _     _
 # |  ___|  _   _   _ __     ___  | |_  (_)   ___    _ __    ___
