@@ -172,7 +172,7 @@ Ironically this parameter cannot be put into the parameter file.
     # --print-source [FILE]
     """Have your own method of downloading videos?
 You can use the parameter `--print-source` to print the direct links to the recordings instead of downloading them.
-By default the links are printed in your terminal. If you follow up the parameter with a file e.g. `--print-source video_links.txt` a file with that name is created and all the links are aved there.
+By default the links are printed in your terminal. If you follow up the parameter with a file e.g. `--print-source video_links.txt` a file with that name is created and all the links are saved there.
 """,
     # --quality {high,medium,low}
     """Downloading recordings takes too long as the files are too big?
