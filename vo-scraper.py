@@ -55,7 +55,7 @@ gitlab_repo_page = "https://gitlab.ethz.ch/tgeorg/vo-scraper/"
 gitlab_issue_page = gitlab_repo_page + "issues"
 gitlab_changelog_page = gitlab_repo_page + "-/tags/v"
 remote_version_link = gitlab_repo_page + "raw/master/VERSION"
-program_version = '1.3.0'
+program_version = '2.0.0'
 
 # For web requests
 user_agent = 'Mozilla/5.0'
