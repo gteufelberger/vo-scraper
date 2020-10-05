@@ -974,7 +974,8 @@ if __name__ == '__main__':
 
     if not args.disable_hints and HINT_LIST:
         print()
-        print("Hint:", random.choice(HINT_LIST))
+        print("Hint:")
+        print(random.choice(HINT_LIST))
 
     # Print summary and exit
     print_information(str(link_counter) + " files found, " + str(download_counter) + " downloaded and " + str(skip_counter) + " skipped")
