@@ -147,6 +147,9 @@ Example:
 
 The scraper will read the links from that file and download them as usual.
 """,
+    # --hide-progress-bar
+    """Progress bar breaking your terminal?
+Hide it by passing the parameter `--hide-progress-bar`""",
     # --history FILE
     """Did you know, that the scraper does not re-download a lecture recording if it detects the recording in its download folder?
 This way bandwidth is safed by preventing unecessary re-downloads, especially when using the `--all` parameter to download all existing recordings of a lecture.
