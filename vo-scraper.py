@@ -25,6 +25,7 @@ import json      # For handling json files
 import argparse  # For parsing commandline arguments
 import getpass   # For getting the user password
 import random    # For selecting a random hint
+import shutil    # For getting terminal size
 
 
 # Check whether `requests` is installed
@@ -610,8 +611,9 @@ def downloader(file_name, video_src_link, episode_name):
                     for data in response.iter_content(chunk_size=4096):
                         dl += len(data)
                         f.write(data)
-                        done = int(50 * dl / total_length)
-                        sys.stdout.write("\r[%s%s]" % ('=' * done, ' ' * (50 - done)))
+                        progressbar_width = shutil.get_terminal_size().columns-2
+                        done = int(progressbar_width * dl / total_length)
+                        sys.stdout.write("\r[%s%s]" % ('=' * done, ' ' * (progressbar_width - done)))
                         sys.stdout.flush()
             print()
 
