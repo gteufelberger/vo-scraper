@@ -717,7 +717,7 @@ def setup_arg_parser():
     )
     parser.add_argument(
         "-d", "--destination",
-        help="Directory where to save the files to. By default this is the folder \"Lecture Recordings/\" of the current working directory."
+        help="Directory where to save the files to. By default this is the folder \"" + directory_prefix + "\" of the current working directory."
     )
     parser.add_argument(
         "--disable-hints",
