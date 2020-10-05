@@ -234,6 +234,9 @@ def acquire_login_cookie(protection, vo_link, user, passw):
     vo_link     -- The link to the lecture
     user        -- The username passed from a text file
     passw       -- The password passed from a text file
+
+    Returns:
+    Cookie jar containing the users valid authentication cookie
     """
     global user_agent
 
