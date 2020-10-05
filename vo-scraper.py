@@ -599,7 +599,9 @@ def downloader(file_name, video_src_link, episode_name):
 
                 print_information("Downloading " + episode_name + " (%.2f" % (int(total_length) / 1024 / 1024) + " MiB)")
 
-                if total_length is None or HIDE_PROGRESS_BAR:  # We received no content length header
+                if total_length is None or HIDE_PROGRESS_BAR:
+                    # We received no content length header...
+                    # ... or user wanted to hide the progress bar
                     f.write(response.content)
                 else:
                     # Download file and show progress bar
