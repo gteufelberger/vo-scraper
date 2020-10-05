@@ -125,7 +125,7 @@ Usage example:
 Run `python3 vo-scraper.py --bug` or report it directly at https://gitlab.ethz.ch/tgeorg/vo-scraper/issues
 """,
     # --destination DESTINATION
-    """Did you know? By default the vo-scraper saves the dowloaded recordings in""" + directory_prefix + """<name of lecture>
+    """Did you know? By default the vo-scraper saves the dowloaded recordings in \"""" + directory_prefix + """<name of lecture>\"
 If you want the recordings saved in a different place you can use the parameter `--destination <your folder>`
 For example:
 
