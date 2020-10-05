@@ -1,4 +1,4 @@
-# vo-scraper
+# vo-scraper 🎓🎥
 
 A python script for ETH students to download lecture videos from [video.ethz.ch](https://video.ethz.ch/).
 
@@ -48,6 +48,18 @@ You may find this example of ranges useful:
 | `1..3..`  | `1 3 5 [...]`   | Every other episodes starting from the second (i.e.. all the second episodes of the week) |
 | `..3..`   | `0 3 6 [...]`   | Every third episodes, starting from the beginning                                         |
 
+### Q: Can I use it to download live streams?
+
+#### A: No
+
+Downloading live streams is not supported.
+
+### Q: Can I use it to download lecture recordings from other platforms (e.g. Zoom)?
+
+#### A: No
+
+Downloading is only supported for recorded lectures on [video.ethz.ch](https://video.ethz.ch/). Other platforms such as Zoom, Moodle, and Polybox are not supported.
+
 ### Q: How do I pass a file with links to multiple lectures?
 
 #### A: Use `--file <filename>`
@@ -66,6 +78,25 @@ Additionally you can also add a username and password at the end of the link sep
     ...
 
 **Note:** This is **NOT** recommended for your NETHZ account password for security reasons!
+
+### Q: I don't like having to pass all those parameters each time I download recordings. Is there a better way?
+
+#### A: Yes
+
+You can can create a file called `parameters.txt` in which you put all your parameters. As long as you keep it in the same directory in which you call the scraper, it will automatically detect the file and read the parameters from there.
+
+**Example:**
+
+If you create a file called `parameters.txt` with the following content
+
+```
+--all
+--quality low
+```
+
+and then run `python3 vo-scraper.py <some lecture link>` in that directory it will download all recordings (`--all`) from that lecture in low quality (`--quality low`) without you having to pass any parameters.
+
+If you want to use a different name for the parameter file, you can pass the parameter `--parameter-file <filename>`. Ironically, you cannot do this via `parameters.txt` :P
 
 ### <a name="how_it_works"></a> Q: How does it acquire the videos?
 
