@@ -25,7 +25,7 @@ unprotected-recording:
     # Install dependency
     - pip3 install requests
     # Download video
-    - python3 vo-scraper.py --hide-progress-bar --quality low --latest https://video.ethz.ch/lectures/d-infk/2020/spring/252-0028-00L.html
+    - python3 vo-scraper.py --disable-hints --hide-progress-bar --quality low --latest https://video.ethz.ch/lectures/d-infk/2020/spring/252-0028-00L.html
     # Compare checksums
     - echo $(sha1sum Lecture\ Recordings/Digital\ Design\ and\ Computer\ Architecture/2020-03-12_low-3ebf562d.mp4) | grep -q f80bcc1c215cebf64a4da7f9623406fb1309e512
 
@@ -37,7 +37,7 @@ pwd-protected-recording:
     # Install dependency
     - pip3 install requests
     # Download video
-    - python3 vo-scraper.py --hide-progress-bar --quality low --latest --file $PWD_LINK_FILE
+    - python3 vo-scraper.py --disable-hints --hide-progress-bar --quality low --latest --file $PWD_LINK_FILE
     # Compare checksums
     - echo $(sha1sum Lecture\ Recordings/Introduction\ to\ Machine\ Learning/2020-05-27\ -\ Tutorial_low-1898f0cc.mp4) | grep -q dce9f9aeb00693b6dbce49b113c10d2f84a29b70
 
@@ -49,7 +49,7 @@ eth-protected-recording:
     # Install dependency
     - pip3 install requests
     # Download video
-    - python3 vo-scraper.py --hide-progress-bar --quality low --latest --file $ETH_LINK_FILE
+    - python3 vo-scraper.py --disable-hints --hide-progress-bar --quality low --latest --file $ETH_LINK_FILE
     # Compare checksums
     - echo $(sha1sum Lecture\ Recordings/Advanced\ Systems\ Lab/2020-03-19_low-fd29952f.mp4) | grep -q efd4a1779a29da08c0186ed6121fc10bfa7e8e83
 
@@ -61,7 +61,7 @@ default-parameter-file:
     # Install dependency
     - pip3 install requests
     # Add parameter file
-    - printf -- "--quality low\n--latest\n--hide-progress-bar\n" > parameters.txt
+    - printf -- "--quality low\n--latest\n--hide-progress-bar\n--disable-hints\n" > parameters.txt
     # Download video
     - python3 vo-scraper.py https://video.ethz.ch/lectures/d-infk/2020/spring/252-0028-00L.html
     # Compare checksums
@@ -75,7 +75,7 @@ custom-parameter-file:
     # Install dependency
     - pip3 install requests
     # Add parameter file
-    - printf -- "--quality low\n--latest\n--hide-progress-bar\n" > parameters2.txt
+    - printf -- "--quality low\n--latest\n--hide-progress-bar\n--disable-hints\n" > parameters2.txt
     # Download video
     - python3 vo-scraper.py --parameter-file parameters2.txt https://video.ethz.ch/lectures/d-infk/2020/spring/252-0028-00L.html
     # Compare checksums
