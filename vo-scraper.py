@@ -81,6 +81,7 @@ download_all = False
 download_latest = False
 verbose = False
 print_src = False
+HIDE_PROGRESS_BAR = False
 
 # Location of text files
 file_to_print_src_to = ""
@@ -595,7 +596,7 @@ def downloader(file_name, video_src_link, episode_name):
 
                 print_information("Downloading " + episode_name + " (%.2f" % (int(total_length) / 1024 / 1024) + " MiB)")
 
-                if total_length is None:  # We received no content length header
+                if total_length is None or HIDE_PROGRESS_BAR:  # We received no content length header
                     f.write(response.content)
                 else:
                     # Download file and show progress bar
@@ -727,6 +728,7 @@ def apply_args(args):
      - verbose
      - bug
      - all
+     - hide-progress-bar
      - quality
      - print-source
      - destination
@@ -740,6 +742,7 @@ def apply_args(args):
     global file_to_print_src_to
     global directory_prefix
     global history_file
+    global HIDE_PROGRESS_BAR
 
     # Check if user wants to submit bug report and exit
     if(args.bug == True):
@@ -750,6 +753,7 @@ def apply_args(args):
     download_all = args.all
     download_latest = args.latest
     video_quality = args.quality
+    HIDE_PROGRESS_BAR = args.hide_progress_bar
 
     # Check for printing flag
     if hasattr(args, 'print_src'):
@@ -804,6 +808,11 @@ def setup_arg_parser():
     parser.add_argument(
         "-f", "--file",
         help="A file with links to all the lectures you want to download. Each lecture link should be on a new line. See README.md for details."
+    )
+    parser.add_argument(
+        "--hide-progress-bar",
+        action="store_true",
+        help="Hides the progress bar that is displayed while downloading a recording."
     )
     parser.add_argument(
         "-hs", "--history",
