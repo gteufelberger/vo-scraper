@@ -728,7 +728,6 @@ def read_links_from_file(file):
 def apply_args(args):
     """Applies the provided command line arguments
     The following are handled here:
-     - verbose
      - bug
      - all
      - hide-progress-bar
