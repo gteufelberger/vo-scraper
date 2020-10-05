@@ -113,7 +113,7 @@ HINT_LIST = [
     # --help
     """Want to know more about the scrapers functionality?
 Run `python3 vo-scraper.py --help` to see all commands that can be used with the scraper.
-For a detailed explanation of some of the commands, checkout the README here: https://gitlab.ethz.ch/tgeorg/vo-scraper""",
+For a detailed explanation of some of the commands, check out the README here: https://gitlab.ethz.ch/tgeorg/vo-scraper""",
     # --all
     """Want to download all recordings of a lecture at once?
 If you call the vo-scraper with `--all` it will skip the selection screen and will download all recordings instead.
