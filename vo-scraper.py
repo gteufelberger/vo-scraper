@@ -986,7 +986,8 @@ if __name__ == '__main__':
     for (file_name, video_src_link, episode_name) in video_src_collection:
         downloader(file_name, video_src_link, episode_name)
 
-    if not args.disable_hints and HINT_LIST:
+    # Display hints if applicable
+    if not args.disable_hints and HINT_LIST and video_src_collection:
         print()
         print("-"*shutil.get_terminal_size().columns)
         print("Hint:")
