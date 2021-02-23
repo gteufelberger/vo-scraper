@@ -965,6 +965,13 @@ if __name__ == '__main__':
         print_information("Currently selected: " + link, verbose_only=True)
         if "video.ethz.ch" not in link:
             print_information("Looks like the provided link does not go to 'videos.ethz.ch' and has therefore been skipped. Make sure that it is correct: " + link, type='warning')
+
+            # Give some useful information if the provided link goes to YouTube or Zoom
+            if "youtube" in link or "youtu.be" in link:
+                print_information("Note that if you want to download a lecture from YouTube, I recommend youtube-dl: https://github.com/ytdl-org/youtube-dl/")
+            if "zoom.us" in link:
+                print_information("Note that if you want to download a lecture from Zoom, I recommend zoomdl: https://github.com/Battleman/zoomdl/")
+
         else:
             video_src_collection += vo_scrapper(link, user, password)
         print()
