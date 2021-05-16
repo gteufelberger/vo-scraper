@@ -147,7 +147,7 @@ The scraper will read the links from that file and download them as usual.""",
 Hide it by passing the parameter `--hide-progress-bar`""",
     # --history FILE
     """Did you know, that the scraper does not re-download a lecture recording if it detects the recording in its download folder?
-This way bandwidth is safed by preventing unecessary re-downloads, especially when using the `--all` parameter to download all existing recordings of a lecture.
+This way bandwidth is saved by preventing unecessary re-downloads, especially when using the `--all` parameter to download all existing recordings of a lecture.
 However this also mean that if you delete the recording and run the scraper with `--all` again it will re-download the recording.
 
 To fix this you can use the parameter `--history <some filename>` which creates a text file with that name and stores a history of all downloaded lectures there.
