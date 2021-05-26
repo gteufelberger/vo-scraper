@@ -136,7 +136,7 @@ saves the recordings inside the folder name \"my_folder\"""",
 You can pass the parameter `--disable-hints` to not show hints after running.""",
     # --file FILE
     """Downloading multiple lectures and tired of having to enter all those links everytime you want to download a recording?
-You can paste all your links in a text file and then tell the scraper to read from that file using the paramter `--file <your text file>`
+You can paste all your links in a text file and then tell the scraper to read from that file using the parameter `--file <your text file>`
 Example:
 
     python3 vo-scraper.py --file my_lectures.txt
