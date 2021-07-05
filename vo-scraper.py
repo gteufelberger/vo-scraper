@@ -300,7 +300,7 @@ def pretty_print_episodes(vo_json_data, selected):
     """Prints the episode numbers that match `selected`"""
     # Get length of longest strings for nice formatting when printing
     nr_length = len(" Nr.")
-    max_date_length = max([len(str(episode['createdAt'][:-6])) for episode in vo_json_data['episodes']])
+    max_date_length = max([len(str(episode['createdAt'][:10])) for episode in vo_json_data['episodes']])
     max_title_length = max([len(episode['title']) for episode in vo_json_data['episodes']])
     max_lecturer_length = max([len(str(episode['createdBy'])) for episode in vo_json_data['episodes']])
 
@@ -321,7 +321,7 @@ def pretty_print_episodes(vo_json_data, selected):
         print_information(
             "%3d".ljust(nr_length) % episode_nr
             + " | " +
-            episode['createdAt'][:-6].ljust(max_date_length)
+            episode['createdAt'][:10].ljust(max_date_length)
             + " | " +
             episode['title'].ljust(max_title_length)
             + " | " +
@@ -479,7 +479,7 @@ def vo_scrapper(vo_link, user, passw):
             # The lecture requires a login
             print_information("Received 401 response. The following lecture requires a valid login cookie:", type='error')
             item = vo_json_data['episodes'][item_nr]
-            print_information("%2d" % item_nr + " " + item['title'] + " " + str(item['createdBy']) + " " + item['createdAt'][:-6], type='error')
+            print_information("%2d" % item_nr + " " + item['title'] + " " + str(item['createdBy']) + " " + item['createdAt'][:10], type='error')
             print_information("Make sure your token is valid. See README.md on how to acquire it.", type='error')
             print()
             continue
@@ -511,10 +511,10 @@ def vo_scrapper(vo_link, user, passw):
             episode_title = episode_title[len(lecture_title):]
 
         # Extract episode name before adding the date to episode_title
-        episode_name = item['createdAt'][:-6] + " " + lecture_title + episode_title
+        episode_name = item['createdAt'][:10] + " " + lecture_title + episode_title
 
         # Append date
-        episode_title = item['createdAt'][:-6] + episode_title
+        episode_title = item['createdAt'][:10] + episode_title
 
         # Generate a pseudo hash by using part of the filename of the online version (which appears to be a UUID)
         pseudo_hash = video_src_link.replace('https://oc-vp-dist-downloads.ethz.ch/mh_default_org/oaipmh-mmp/', '')[:8]
