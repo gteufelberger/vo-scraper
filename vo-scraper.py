@@ -413,8 +413,7 @@ def vo_scrapper(vo_link, user, passw):
     global link_counter
 
     # Remove `.html` file extension
-    if vo_link.endswith('.html'):
-        vo_link = vo_link[:-5]
+    vo_link = vo_link.replace(".html", "")
 
     # Get lecture metadata for episode list
     r = requests.get(vo_link + series_metadata_suffix, headers={'User-Agent': user_agent})
