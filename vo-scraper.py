@@ -390,7 +390,7 @@ def get_video_src_link_for_resolution(video_json_data, video_quality):
     Keyword arguments:
     video_json_data -- JSON structure containing information about the requested recording
     video_quality   -- The desired video quality
-    
+
     Returns:
     Direct link to the corresponding video stream based on desired resolution.
     """
@@ -494,6 +494,9 @@ def vo_scrapper(vo_link, user, passw):
         # Get link to video metadata json file
         item = vo_json_data['episodes'][item_nr]
         video_info_link = video_info_prefix + item['id']
+
+        # Print it for debbuging
+        print_information(video_info_link, verbose_only=True)
 
         # Download the video metadata file
         # Use login-cookie if provided otherwise make request without cookie
