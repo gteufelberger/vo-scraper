@@ -485,20 +485,20 @@ def vo_scrapper(vo_link, user, passw):
             continue
         video_json_data = json.loads(r.text)
 
-        # Put available versions in list for sorting by video quality
+        # Put available resolutions in list for sorting by video quality
         counter = 0
-        versions = list()
-        print_information("Available versions:", verbose_only=True)
+        resolutions = list()
+        print_information("Available resolutions:", verbose_only=True)
         for vid_version in video_json_data['streams'][0]['sources']['mp4']:
-            versions.append((counter, vid_version['res']['w'] * vid_version['res']['h']))
+            resolutions.append((counter, vid_version['res']['w'] * vid_version['res']['h']))
             print_information(f"{str(counter)}: {vid_version['res']['w']:4}x{vid_version['res']['h']:4}", verbose_only=True)
             counter += 1
-        versions.sort(key=lambda tup: tup[1], reverse=True)
+        resolutions.sort(key=lambda tup: tup[1], reverse=True)
         # Now it's sorted: high -> medium -> low
 
         # Get video src url from json
         try:  # try/except block to handle cases were not all three types of quality exist
-            video_src_link = video_json_data['streams'][0]['sources']['mp4'][versions[quality_dict[video_quality]][0]]['src']
+            video_src_link = video_json_data['streams'][0]['sources']['mp4'][resolutions[quality_dict[video_quality]][0]]['src']
         except IndexError:
             print_information("Requested quality \"" + video_quality + "\" not available. Skipping episode!", type='error')
             continue
