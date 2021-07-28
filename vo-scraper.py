@@ -491,7 +491,7 @@ def vo_scrapper(vo_link, user, passw):
         print_information("Available versions:", verbose_only=True)
         for vid_version in video_json_data['streams'][0]['sources']['mp4']:
             versions.append((counter, vid_version['res']['w'] * vid_version['res']['h']))
-            print_information(str(counter) + ": " + "%4d" % vid_version['res']['w'] + "x" + "%4d" % vid_version['res']['h'], verbose_only=True)
+            print_information(f"{str(counter)}: {vid_version['res']['w']:4}x{vid_version['res']['h']:4}", verbose_only=True)
             counter += 1
         versions.sort(key=lambda tup: tup[1], reverse=True)
         # Now it's sorted: high -> medium -> low
