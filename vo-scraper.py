@@ -525,8 +525,7 @@ def vo_scrapper(vo_link, user, passw):
         episode_title = vo_json_data["episodes"][item_nr]["title"]
 
         # If video and lecture title overlap, remove lecture title from video title
-        if episode_title.startswith(lecture_title):
-            episode_title = episode_title[len(lecture_title):]
+        episode_title = episode_title.replace(lecture_title, "")
 
         # Extract episode name before adding the date to episode_title
         episode_name = item['createdAt'][:10] + " " + lecture_title + episode_title
