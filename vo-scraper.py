@@ -383,6 +383,7 @@ def get_user_choice(max_episode_number):
 
     return choice
 
+
 def get_video_src_link_for_resolution(video_json_data, video_quality):
     """
     Takes the JSON data and requested quality and returns the direct link to that video stream.
@@ -619,7 +620,7 @@ def downloader(file_name, video_src_link, episode_name):
                     for data in response.iter_content(chunk_size=4096):
                         dl += len(data)
                         f.write(data)
-                        progressbar_width = shutil.get_terminal_size().columns-2
+                        progressbar_width = shutil.get_terminal_size().columns - 2
                         done = int(progressbar_width * dl / total_length)
                         sys.stdout.write("\r[%s%s]" % ('=' * done, ' ' * (progressbar_width - done)))
                         sys.stdout.flush()
@@ -1005,10 +1006,10 @@ if __name__ == '__main__':
     # Display hints if applicable
     if not args.disable_hints and HINT_LIST and video_src_collection:
         print()
-        print("-"*shutil.get_terminal_size().columns)
+        print("-" * shutil.get_terminal_size().columns)
         print("Hint:")
         print(random.choice(HINT_LIST))
-        print("-"*shutil.get_terminal_size().columns)
+        print("-" * shutil.get_terminal_size().columns)
 
     # Print summary and exit
     print_information(str(link_counter) + " files found, " + str(download_counter) + " downloaded and " + str(skip_counter) + " skipped")
