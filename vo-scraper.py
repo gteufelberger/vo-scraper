@@ -383,6 +383,32 @@ def get_user_choice(max_episode_number):
 
     return choice
 
+def get_video_src_link_for_resolution(video_json_data, video_quality):
+    """
+    Takes the JSON data and requested quality and returns the direct link to that video stream.
+
+    Keyword arguments:
+    video_json_data -- JSON structure containing information about the requested recording
+    video_quality   -- The desired video quality
+    
+    Returns:
+    Direct link to the corresponding video stream based on desired resolution.
+    """
+    # Put available resolutions in list for sorting by video quality
+    counter = 0
+    resolutions = list()
+    print_information("Available resolutions:", verbose_only=True)
+    for vid_version in video_json_data['streams'][0]['sources']['mp4']:
+        resolutions.append((counter, vid_version['res']['w'] * vid_version['res']['h']))
+        print_information(f"{str(counter)}: {vid_version['res']['w']:4}x{vid_version['res']['h']:4}", verbose_only=True)
+        counter += 1
+    resolutions.sort(key=lambda tup: tup[1], reverse=True)
+    # Now it's sorted: high -> medium -> low
+
+    # Get video src url from json
+    video_src_link = video_json_data['streams'][0]['sources']['mp4'][resolutions[quality_dict[video_quality]][0]]['src']
+    return video_src_link
+
 
 def vo_scrapper(vo_link, user, passw):
     """
@@ -485,20 +511,9 @@ def vo_scrapper(vo_link, user, passw):
             continue
         video_json_data = json.loads(r.text)
 
-        # Put available resolutions in list for sorting by video quality
-        counter = 0
-        resolutions = list()
-        print_information("Available resolutions:", verbose_only=True)
-        for vid_version in video_json_data['streams'][0]['sources']['mp4']:
-            resolutions.append((counter, vid_version['res']['w'] * vid_version['res']['h']))
-            print_information(f"{str(counter)}: {vid_version['res']['w']:4}x{vid_version['res']['h']:4}", verbose_only=True)
-            counter += 1
-        resolutions.sort(key=lambda tup: tup[1], reverse=True)
-        # Now it's sorted: high -> medium -> low
-
-        # Get video src url from json
+        # Get video src url from json based on resolution
         try:  # try/except block to handle cases were not all three types of quality exist
-            video_src_link = video_json_data['streams'][0]['sources']['mp4'][resolutions[quality_dict[video_quality]][0]]['src']
+            video_src_link = get_video_src_link_for_resolution(video_json_data, video_quality)
         except IndexError:
             print_information("Requested quality \"" + video_quality + "\" not available. Skipping episode!", type='error')
             continue
