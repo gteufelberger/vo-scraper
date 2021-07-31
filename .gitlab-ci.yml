@@ -39,7 +39,7 @@ pwd-protected-recording:
     # Download video
     - python3 vo-scraper.py --disable-hints --hide-progress-bar --quality lowest --latest --file $PWD_LINK_FILE
     # Compare checksums
-    - echo $(sha1sum Lecture\ Recordings/Introduction\ to\ Machine\ Learning/2020-05-27\ -\ Tutorial_360p-1898f0cc.mp4) | grep -q dce9f9aeb00693b6dbce49b113c10d2f84a29b70
+    - echo $(sha1sum Lecture\ Recordings/Introduction\ to\ Machine\ Learning/2020-05-27\ -\ Tutorial_360p-1898f0cc.mp4) | grep -q 1b5a1aff3053afd6e700c69d4075aa94aa1daef0
 
 # Download 'ETH' protected video
 eth-protected-recording:
@@ -51,7 +51,7 @@ eth-protected-recording:
     # Download video
     - python3 vo-scraper.py --disable-hints --hide-progress-bar --quality lowest --latest --file $ETH_LINK_FILE
     # Compare checksums
-    - echo $(sha1sum Lecture\ Recordings/Advanced\ Systems\ Lab/2020-03-19_360p-fd29952f.mp4) | grep -q efd4a1779a29da08c0186ed6121fc10bfa7e8e83
+    - echo $(sha1sum Lecture\ Recordings/Advanced\ Systems\ Lab/2020-03-19_360p-fd29952f.mp4) | grep -q cb80b301a9dec6e0196d97d8aea7e28f4a759d49
 
 # Test default named parameter file
 default-parameter-file:
