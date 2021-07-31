@@ -75,7 +75,7 @@ video_info_prefix = "https://video.ethz.ch/.episode-video.json?recordId="
 directory_prefix = "Lecture Recordings" + os.sep
 
 # Default quality
-video_quality = "high"
+video_quality = "HD"
 
 # Boolean flags
 download_all = False
@@ -88,13 +88,6 @@ HIDE_PROGRESS_BAR = False
 file_to_print_src_to = ""
 history_file = ""
 PARAMETER_FILE = "parameters.txt"
-
-quality_dict = {
-    'high': 0,
-    'medium': 1,
-    'low': 2
-}
-
 
 class bcolors:
     INFO = '\033[94m'
@@ -166,14 +159,14 @@ Ironically this parameter cannot be put into the parameter file.""",
     """Have your own method of downloading videos?
 You can use the parameter `--print-source` to print the direct links to the recordings instead of downloading them.
 By default the links are printed in your terminal. If you follow up the parameter with a file e.g. `--print-source video_links.txt` a file with that name is created and all the links are saved there.""",
-    # --quality {high,medium,low}
+    # --quality
     """Downloading recordings takes too long as the files are too big?
-You can download switch between different video qualities using the `--quality` parameter together with the keyword 'high', 'low', or 'medium'
+You can download different video resolutions using the `--quality` parameter together with desired resolution either as an integer or specified via a keyword like `HD`, `2K`, `4K`.
 Example:
 
-    python3 vo-scraper.py --quality high https://video.ethz.ch/lectures/d-infk/2019/spring/252-0028-00L.html
+    python3 vo-scraper.py --quality 480p https://video.ethz.ch/lectures/d-infk/2019/spring/252-0028-00L.html
 
-Note that the default quality is 'high', so if you just want the highest possible quality, there's no need to pass this parameter.""",
+If the requested resolution does not exist, the scraper will pick the next closest one. Note that the default quality is 'HD'. If you always want the highest possible quality you can use `--quality highest`. Conversely if always want the lowest quality use `--quality lowest`""",
     # --skip-connection-check
     # --skip-update-check
     """In order to ensure functionality, the scraper will check whether your version is up to date and that you have a connection to video.ethz.ch (as well as the internet if video.ethz.ch fails).
@@ -393,22 +386,53 @@ def get_video_src_link_for_resolution(video_json_data, video_quality):
     video_quality   -- The desired video quality
 
     Returns:
-    Direct link to the corresponding video stream based on desired resolution.
+    Direct link to the corresponding video stream based on desired resolution as well as the
+    vertical resolution of the video.
     """
     # Put available resolutions in list for sorting by video quality
     counter = 0
     resolutions = list()
     print_information("Available resolutions:", verbose_only=True)
     for vid_version in video_json_data['streams'][0]['sources']['mp4']:
-        resolutions.append((counter, vid_version['res']['w'] * vid_version['res']['h']))
+        resolutions.append((counter, vid_version['res']['w'], vid_version['res']['h']))
         print_information(f"{str(counter)}: {vid_version['res']['w']:4}x{vid_version['res']['h']:4}", verbose_only=True)
         counter += 1
-    resolutions.sort(key=lambda tup: tup[1], reverse=True)
-    # Now it's sorted: high -> medium -> low
+    resolutions.sort(key=lambda tup: tup[1] * tup[2], reverse=True)
+    # Now it's sorted: highest -> lowest
 
     # Get video src url from json
-    video_src_link = video_json_data['streams'][0]['sources']['mp4'][resolutions[quality_dict[video_quality]][0]]['src']
-    return video_src_link
+    if video_quality == "lowest":
+        quality_index = -1
+    elif video_quality == "highest":
+        quality_index = 0
+    else:
+        # Turn named resolution into number
+        if video_quality.lower() == "4k":
+            video_quality = "2160p"
+        if video_quality.lower() == "2k":
+            video_quality = "1440p"
+        if video_quality.lower() == "hd":
+            video_quality = "1080p"
+
+        # Parse the given video resolution
+        video_quality_parsed = int(str(video_quality).replace("p", ""))
+
+        # Subtract requested from available resolutions to get the closest one
+        list_of_quality_diff = [(x[0], abs(video_quality_parsed - x[2])) for x in resolutions]
+
+        # Get the resolution closest to the requested one
+        min_value = min(list_of_quality_diff, key = lambda t: t[1])
+        quality_index = min_value[0]
+
+        # Show a warning if the we cannot return the requested resolution
+        if min_value[1] != 0:
+            print_information(f"Requested quality {video_quality} not available, downloading {video_json_data['streams'][0]['sources']['mp4'][quality_index]['res']['h']}p instead", type='warning')
+
+    # Save actual quality of video for filename
+    video_quality = str(video_json_data['streams'][0]['sources']['mp4'][resolutions[quality_index][0]]['res']['h'])+'p'
+
+    video_src_link = video_json_data['streams'][0]['sources']['mp4'][resolutions[quality_index][0]]['src']
+    return video_src_link, video_quality
 
 
 def vo_scrapper(vo_link, user, passw):
@@ -516,11 +540,7 @@ def vo_scrapper(vo_link, user, passw):
         video_json_data = json.loads(r.text)
 
         # Get video src url from json based on resolution
-        try:  # try/except block to handle cases were not all three types of quality exist
-            video_src_link = get_video_src_link_for_resolution(video_json_data, video_quality)
-        except IndexError:
-            print_information("Requested quality \"" + video_quality + "\" not available. Skipping episode!", type='error')
-            continue
+        video_src_link, video_quality = get_video_src_link_for_resolution(video_json_data, video_quality)
 
         lecture_title = vo_json_data['title']
         episode_title = vo_json_data["episodes"][item_nr]["title"]
@@ -853,9 +873,8 @@ def setup_arg_parser():
     )
     parser.add_argument(
         "-q", "--quality",
-        choices=['high', 'medium', 'low'],
-        default='high',
-        help="Select video quality. Accepted values are \"high\" (1920x1080), \"medium\" (1280x720), and \"low\" (640x360). Default is \"high\""
+        default='HD',
+        help="Select a specific video resolution. Either specify a height directly like `1080p` or use the keywords `HD`, `2K`, and `4K`. The scraper will try to download the video closest to the specified resolution. Additionally you can also use `highest` and `lowest` to always download the highest or lowest quality respectively.",
     )
     parser.add_argument(
         "-sc", "--skip-connection-check",
