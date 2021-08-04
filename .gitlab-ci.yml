@@ -128,4 +128,4 @@ different-resolutions-custom:
     # Download video
     - python3 vo-scraper.py --disable-hints --hide-progress-bar --quality 1000p --latest --file $ETH_RES_LINK_FILE
     # Compare checksums
-    - echo $(sha1sum Lecture Recordings/Formal Methods and Functional Programming/2021-06-03_852p-aa6cf77e.mp4) | grep -q f52cdfc462f2959c94a8ac86b0f16eef5fb8a4ff
+    - echo $(sha1sum Lecture\ Recordings/Formal\ Methods\ and\ Functional\ Programming/2021-06-03_852p-aa6cf77e.mp4) | grep -q f52cdfc462f2959c94a8ac86b0f16eef5fb8a4ff
