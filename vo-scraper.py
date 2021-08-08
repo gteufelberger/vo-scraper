@@ -435,7 +435,7 @@ def get_video_src_link_for_resolution(video_json_data, video_quality):
     return video_src_link, video_quality
 
 
-def vo_scrapper(vo_link, user, passw):
+def vo_scrapper(vo_link, video_quality, user, passw):
     """
     Gets the list of all available videos for a lecture.
     Allows user to select multiple videos.
@@ -453,7 +453,6 @@ def vo_scrapper(vo_link, user, passw):
     global download_all
     global download_latest
 
-    global video_quality
     global quality_dict
     global cookie_jar
 
@@ -540,7 +539,7 @@ def vo_scrapper(vo_link, user, passw):
         video_json_data = json.loads(r.text)
 
         # Get video src url from json based on resolution
-        video_src_link, video_quality = get_video_src_link_for_resolution(video_json_data, video_quality)
+        video_src_link, available_video_quality = get_video_src_link_for_resolution(video_json_data, video_quality)        
 
         lecture_title = vo_json_data['title']
         episode_title = vo_json_data["episodes"][item_nr]["title"]
@@ -560,7 +559,7 @@ def vo_scrapper(vo_link, user, passw):
 
         # Filename is `directory/<video date (YYYY-MM-DD)><leftovers from video title>_<quality>-<pseudo_hash>.mp4`
         directory = directory_prefix + lecture_title + os.sep
-        file_name = directory + episode_title + "_" + video_quality + "-" + pseudo_hash + ".mp4"
+        file_name = directory + episode_title + "_" + available_video_quality + "-" + pseudo_hash + ".mp4"
         print_information(file_name, verbose_only=True)
 
         local_video_src_collection.append((file_name, video_src_link, episode_name))
@@ -1009,7 +1008,7 @@ if __name__ == '__main__':
                 print_information("Note that if you want to download a lecture from Zoom, I recommend zoomdl: https://github.com/Battleman/zoomdl/")
 
         else:
-            video_src_collection += vo_scrapper(link, user, password)
+            video_src_collection += vo_scrapper(link, video_quality, user, password)
         print()
 
     # Print collected episodes
