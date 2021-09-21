@@ -55,7 +55,7 @@ gitlab_repo_page = "https://gitlab.ethz.ch/tgeorg/vo-scraper/"
 gitlab_issue_page = gitlab_repo_page + "issues"
 gitlab_changelog_page = gitlab_repo_page + "-/tags/v"
 remote_version_link = gitlab_repo_page + "raw/master/VERSION"
-program_version = '2.0.0'
+program_version = '3.0.0'
 
 # For web requests
 user_agent = 'Mozilla/5.0'
@@ -75,7 +75,7 @@ video_info_prefix = "https://video.ethz.ch/.episode-video.json?recordId="
 directory_prefix = "Lecture Recordings" + os.sep
 
 # Default quality
-video_quality = "high"
+video_quality = "HD"
 
 # Boolean flags
 download_all = False
@@ -88,13 +88,6 @@ HIDE_PROGRESS_BAR = False
 file_to_print_src_to = ""
 history_file = ""
 PARAMETER_FILE = "parameters.txt"
-
-quality_dict = {
-    'high': 0,
-    'medium': 1,
-    'low': 2
-}
-
 
 class bcolors:
     INFO = '\033[94m'
@@ -113,7 +106,7 @@ HINT_LIST = [
     # --help
     """Want to know more about the scrapers functionality?
 Run `python3 vo-scraper.py --help` to see all commands that can be used with the scraper.
-For a detailed explanation of some of the commands, checkout the README here: https://gitlab.ethz.ch/tgeorg/vo-scraper""",
+For a detailed explanation of some of the commands, check out the README here: https://gitlab.ethz.ch/tgeorg/vo-scraper""",
     # --all
     """Want to download all recordings of a lecture at once?
 If you call the vo-scraper with `--all` it will skip the selection screen and will download all recordings instead.
@@ -136,7 +129,7 @@ saves the recordings inside the folder name \"my_folder\"""",
 You can pass the parameter `--disable-hints` to not show hints after running.""",
     # --file FILE
     """Downloading multiple lectures and tired of having to enter all those links everytime you want to download a recording?
-You can paste all your links in a text file and then tell the scraper to read from that file using the paramter `--file <your text file>`
+You can paste all your links in a text file and then tell the scraper to read from that file using the parameter `--file <your text file>`
 Example:
 
     python3 vo-scraper.py --file my_lectures.txt
@@ -147,7 +140,7 @@ The scraper will read the links from that file and download them as usual.""",
 Hide it by passing the parameter `--hide-progress-bar`""",
     # --history FILE
     """Did you know, that the scraper does not re-download a lecture recording if it detects the recording in its download folder?
-This way bandwidth is safed by preventing unecessary re-downloads, especially when using the `--all` parameter to download all existing recordings of a lecture.
+This way bandwidth is saved by preventing unecessary re-downloads, especially when using the `--all` parameter to download all existing recordings of a lecture.
 However this also mean that if you delete the recording and run the scraper with `--all` again it will re-download the recording.
 
 To fix this you can use the parameter `--history <some filename>` which creates a text file with that name and stores a history of all downloaded lectures there.
@@ -166,14 +159,14 @@ Ironically this parameter cannot be put into the parameter file.""",
     """Have your own method of downloading videos?
 You can use the parameter `--print-source` to print the direct links to the recordings instead of downloading them.
 By default the links are printed in your terminal. If you follow up the parameter with a file e.g. `--print-source video_links.txt` a file with that name is created and all the links are saved there.""",
-    # --quality {high,medium,low}
+    # --quality
     """Downloading recordings takes too long as the files are too big?
-You can download switch between different video qualities using the `--quality` parameter together with the keyword 'high', 'low', or 'medium'
+You can download different video resolutions using the `--quality` parameter together with desired resolution either as an integer or specified via a keyword like `HD`, `2K`, `4K`.
 Example:
 
-    python3 vo-scraper.py --quality high https://video.ethz.ch/lectures/d-infk/2019/spring/252-0028-00L.html
+    python3 vo-scraper.py --quality 480p https://video.ethz.ch/lectures/d-infk/2019/spring/252-0028-00L.html
 
-Note that the default quality is 'high', so if you just want the highest possible quality, there's no need to pass this parameter.""",
+If the requested resolution does not exist, the scraper will pick the next closest one. Note that the default quality is 'HD'. If you always want the highest possible quality you can use `--quality highest`. Conversely if always want the lowest quality use `--quality lowest`""",
     # --skip-connection-check
     # --skip-update-check
     """In order to ensure functionality, the scraper will check whether your version is up to date and that you have a connection to video.ethz.ch (as well as the internet if video.ethz.ch fails).
@@ -300,7 +293,7 @@ def pretty_print_episodes(vo_json_data, selected):
     """Prints the episode numbers that match `selected`"""
     # Get length of longest strings for nice formatting when printing
     nr_length = len(" Nr.")
-    max_date_length = max([len(str(episode['createdAt'][:-6])) for episode in vo_json_data['episodes']])
+    max_date_length = max([len(str(episode['createdAt'][:10])) for episode in vo_json_data['episodes']])
     max_title_length = max([len(episode['title']) for episode in vo_json_data['episodes']])
     max_lecturer_length = max([len(str(episode['createdBy'])) for episode in vo_json_data['episodes']])
 
@@ -321,7 +314,7 @@ def pretty_print_episodes(vo_json_data, selected):
         print_information(
             "%3d".ljust(nr_length) % episode_nr
             + " | " +
-            episode['createdAt'][:-6].ljust(max_date_length)
+            episode['createdAt'][:10].ljust(max_date_length)
             + " | " +
             episode['title'].ljust(max_title_length)
             + " | " +
@@ -384,7 +377,65 @@ def get_user_choice(max_episode_number):
     return choice
 
 
-def vo_scrapper(vo_link, user, passw):
+def get_video_src_link_for_resolution(video_json_data, video_quality):
+    """
+    Takes the JSON data and requested quality and returns the direct link to that video stream.
+
+    Keyword arguments:
+    video_json_data -- JSON structure containing information about the requested recording
+    video_quality   -- The desired video quality
+
+    Returns:
+    Direct link to the corresponding video stream based on desired resolution as well as the
+    vertical resolution of the video.
+    """
+    # Put available resolutions in list for sorting by video quality
+    counter = 0
+    resolutions = list()
+    print_information("Available resolutions:", verbose_only=True)
+    for vid_version in video_json_data['streams'][0]['sources']['mp4']:
+        resolutions.append((counter, vid_version['res']['w'], vid_version['res']['h']))
+        print_information(f"{str(counter)}: {vid_version['res']['w']:4}x{vid_version['res']['h']:4}", verbose_only=True)
+        counter += 1
+    resolutions.sort(key=lambda tup: tup[1] * tup[2], reverse=True)
+    # Now it's sorted: highest -> lowest
+
+    # Get video src url from json
+    if video_quality == "lowest":
+        quality_index = -1
+    elif video_quality == "highest":
+        quality_index = 0
+    else:
+        # Turn named resolution into number
+        if video_quality.lower() == "4k":
+            video_quality = "2160p"
+        if video_quality.lower() == "2k":
+            video_quality = "1440p"
+        if video_quality.lower() == "hd":
+            video_quality = "1080p"
+
+        # Parse the given video resolution
+        video_quality_parsed = int(str(video_quality).replace("p", ""))
+
+        # Subtract requested from available resolutions to get the closest one
+        list_of_quality_diff = [(x[0], abs(video_quality_parsed - x[2])) for x in resolutions]
+
+        # Get the resolution closest to the requested one
+        min_value = min(list_of_quality_diff, key = lambda t: t[1])
+        quality_index = min_value[0]
+
+        # Show a warning if the we cannot return the requested resolution
+        if min_value[1] != 0:
+            print_information(f"Requested quality {video_quality} not available, downloading {video_json_data['streams'][0]['sources']['mp4'][quality_index]['res']['h']}p instead", type='warning')
+
+    # Save actual quality of video for filename
+    video_quality = str(video_json_data['streams'][0]['sources']['mp4'][resolutions[quality_index][0]]['res']['h'])+'p'
+
+    video_src_link = video_json_data['streams'][0]['sources']['mp4'][resolutions[quality_index][0]]['src']
+    return video_src_link, video_quality
+
+
+def vo_scrapper(vo_link, video_quality, user, passw):
     """
     Gets the list of all available videos for a lecture.
     Allows user to select multiple videos.
@@ -402,7 +453,6 @@ def vo_scrapper(vo_link, user, passw):
     global download_all
     global download_latest
 
-    global video_quality
     global quality_dict
     global cookie_jar
 
@@ -413,8 +463,7 @@ def vo_scrapper(vo_link, user, passw):
     global link_counter
 
     # Remove `.html` file extension
-    if vo_link.endswith('.html'):
-        vo_link = vo_link[:-5]
+    vo_link = vo_link.replace(".html", "")
 
     # Get lecture metadata for episode list
     r = requests.get(vo_link + series_metadata_suffix, headers={'User-Agent': user_agent})
@@ -470,6 +519,9 @@ def vo_scrapper(vo_link, user, passw):
         item = vo_json_data['episodes'][item_nr]
         video_info_link = video_info_prefix + item['id']
 
+        # Print it for debbuging
+        print_information(video_info_link, verbose_only=True)
+
         # Download the video metadata file
         # Use login-cookie if provided otherwise make request without cookie
         if(cookie_jar):
@@ -480,42 +532,26 @@ def vo_scrapper(vo_link, user, passw):
             # The lecture requires a login
             print_information("Received 401 response. The following lecture requires a valid login cookie:", type='error')
             item = vo_json_data['episodes'][item_nr]
-            print_information("%2d" % item_nr + " " + item['title'] + " " + str(item['createdBy']) + " " + item['createdAt'][:-6], type='error')
+            print_information("%2d" % item_nr + " " + item['title'] + " " + str(item['createdBy']) + " " + item['createdAt'][:10], type='error')
             print_information("Make sure your token is valid. See README.md on how to acquire it.", type='error')
             print()
             continue
         video_json_data = json.loads(r.text)
 
-        # Put available versions in list for sorting by video quality
-        counter = 0
-        versions = list()
-        print_information("Available versions:", verbose_only=True)
-        for vid_version in video_json_data['streams'][0]['sources']['mp4']:
-            versions.append((counter, vid_version['res']['w'] * vid_version['res']['h']))
-            print_information(str(counter) + ": " + "%4d" % vid_version['res']['w'] + "x" + "%4d" % vid_version['res']['h'], verbose_only=True)
-            counter += 1
-        versions.sort(key=lambda tup: tup[1], reverse=True)
-        # Now it's sorted: high -> medium -> low
-
-        # Get video src url from json
-        try:  # try/except block to handle cases were not all three types of quality exist
-            video_src_link = video_json_data['streams'][0]['sources']['mp4'][versions[quality_dict[video_quality]][0]]['src']
-        except IndexError:
-            print_information("Requested quality \"" + video_quality + "\" not available. Skipping episode!", type='error')
-            continue
+        # Get video src url from json based on resolution
+        video_src_link, available_video_quality = get_video_src_link_for_resolution(video_json_data, video_quality)        
 
         lecture_title = vo_json_data['title']
         episode_title = vo_json_data["episodes"][item_nr]["title"]
 
         # If video and lecture title overlap, remove lecture title from video title
-        if episode_title.startswith(lecture_title):
-            episode_title = episode_title[len(lecture_title):]
+        episode_title = episode_title.replace(lecture_title, "")
 
         # Extract episode name before adding the date to episode_title
-        episode_name = item['createdAt'][:-6] + " " + lecture_title + episode_title
+        episode_name = item['createdAt'][:10] + " " + lecture_title + episode_title
 
         # Append date
-        episode_title = item['createdAt'][:-6] + episode_title
+        episode_title = item['createdAt'][:10] + episode_title
 
         # Generate a pseudo hash by using part of the filename of the online version (which appears to be a UUID)
         pseudo_hash = video_src_link.replace('https://oc-vp-dist-downloads.ethz.ch/mh_default_org/oaipmh-mmp/', '')[:8]
@@ -523,7 +559,7 @@ def vo_scrapper(vo_link, user, passw):
 
         # Filename is `directory/<video date (YYYY-MM-DD)><leftovers from video title>_<quality>-<pseudo_hash>.mp4`
         directory = directory_prefix + lecture_title + os.sep
-        file_name = directory + episode_title + "_" + video_quality + "-" + pseudo_hash + ".mp4"
+        file_name = directory + episode_title + "_" + available_video_quality + "-" + pseudo_hash + ".mp4"
         print_information(file_name, verbose_only=True)
 
         local_video_src_collection.append((file_name, video_src_link, episode_name))
@@ -603,7 +639,7 @@ def downloader(file_name, video_src_link, episode_name):
                     for data in response.iter_content(chunk_size=4096):
                         dl += len(data)
                         f.write(data)
-                        progressbar_width = shutil.get_terminal_size().columns-2
+                        progressbar_width = shutil.get_terminal_size().columns - 2
                         done = int(progressbar_width * dl / total_length)
                         sys.stdout.write("\r[%s%s]" % ('=' * done, ' ' * (progressbar_width - done)))
                         sys.stdout.flush()
@@ -836,9 +872,8 @@ def setup_arg_parser():
     )
     parser.add_argument(
         "-q", "--quality",
-        choices=['high', 'medium', 'low'],
-        default='high',
-        help="Select video quality. Accepted values are \"high\" (1920x1080), \"medium\" (1280x720), and \"low\" (640x360). Default is \"high\""
+        default='HD',
+        help="Select a specific video resolution. Either specify a height directly like `1080p` or use the keywords `HD`, `2K`, and `4K`. The scraper will try to download the video closest to the specified resolution. Additionally you can also use `highest` and `lowest` to always download the highest or lowest quality respectively.",
     )
     parser.add_argument(
         "-sc", "--skip-connection-check",
@@ -965,8 +1000,15 @@ if __name__ == '__main__':
         print_information("Currently selected: " + link, verbose_only=True)
         if "video.ethz.ch" not in link:
             print_information("Looks like the provided link does not go to 'videos.ethz.ch' and has therefore been skipped. Make sure that it is correct: " + link, type='warning')
+
+            # Give some useful information if the provided link goes to YouTube or Zoom
+            if "youtube" in link or "youtu.be" in link:
+                print_information("Note that if you want to download a lecture from YouTube, I recommend youtube-dl: https://github.com/ytdl-org/youtube-dl/")
+            if "zoom.us" in link:
+                print_information("Note that if you want to download a lecture from Zoom, I recommend zoomdl: https://github.com/Battleman/zoomdl/")
+
         else:
-            video_src_collection += vo_scrapper(link, user, password)
+            video_src_collection += vo_scrapper(link, video_quality, user, password)
         print()
 
     # Print collected episodes
@@ -979,12 +1021,13 @@ if __name__ == '__main__':
     for (file_name, video_src_link, episode_name) in video_src_collection:
         downloader(file_name, video_src_link, episode_name)
 
-    if not args.disable_hints and HINT_LIST:
+    # Display hints if applicable
+    if not args.disable_hints and HINT_LIST and video_src_collection:
         print()
-        print("-"*shutil.get_terminal_size().columns)
+        print("-" * shutil.get_terminal_size().columns)
         print("Hint:")
         print(random.choice(HINT_LIST))
-        print("-"*shutil.get_terminal_size().columns)
+        print("-" * shutil.get_terminal_size().columns)
 
     # Print summary and exit
     print_information(str(link_counter) + " files found, " + str(download_counter) + " downloaded and " + str(skip_counter) + " skipped")

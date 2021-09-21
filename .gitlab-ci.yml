@@ -25,9 +25,9 @@ unprotected-recording:
     # Install dependency
     - pip3 install requests
     # Download video
-    - python3 vo-scraper.py --disable-hints --hide-progress-bar --quality low --latest https://video.ethz.ch/lectures/d-infk/2020/spring/252-0028-00L.html
+    - python3 vo-scraper.py --disable-hints --hide-progress-bar --quality lowest --latest https://video.ethz.ch/lectures/d-infk/2020/spring/252-0028-00L.html
     # Compare checksums
-    - echo $(sha1sum Lecture\ Recordings/Digital\ Design\ and\ Computer\ Architecture/2020-03-12_low-3ebf562d.mp4) | grep -q f80bcc1c215cebf64a4da7f9623406fb1309e512
+    - echo $(sha1sum Lecture\ Recordings/Digital\ Design\ and\ Computer\ Architecture/2020-03-12_360p-3ebf562d.mp4) | grep -q f80bcc1c215cebf64a4da7f9623406fb1309e512
 
 # Download 'PWD' protected video
 pwd-protected-recording:
@@ -37,9 +37,9 @@ pwd-protected-recording:
     # Install dependency
     - pip3 install requests
     # Download video
-    - python3 vo-scraper.py --disable-hints --hide-progress-bar --quality low --latest --file $PWD_LINK_FILE
+    - python3 vo-scraper.py --disable-hints --hide-progress-bar --quality lowest --latest --file $PWD_LINK_FILE
     # Compare checksums
-    - echo $(sha1sum Lecture\ Recordings/Introduction\ to\ Machine\ Learning/2020-05-27\ -\ Tutorial_low-1898f0cc.mp4) | grep -q dce9f9aeb00693b6dbce49b113c10d2f84a29b70
+    - echo $(sha1sum Lecture\ Recordings/Introduction\ to\ Machine\ Learning/2020-05-27\ -\ Tutorial_360p-1898f0cc.mp4) | grep -q 1b5a1aff3053afd6e700c69d4075aa94aa1daef0
 
 # Download 'ETH' protected video
 eth-protected-recording:
@@ -49,9 +49,9 @@ eth-protected-recording:
     # Install dependency
     - pip3 install requests
     # Download video
-    - python3 vo-scraper.py --disable-hints --hide-progress-bar --quality low --latest --file $ETH_LINK_FILE
+    - python3 vo-scraper.py --disable-hints --hide-progress-bar --quality lowest --latest --file $ETH_LINK_FILE
     # Compare checksums
-    - echo $(sha1sum Lecture\ Recordings/Advanced\ Systems\ Lab/2020-03-19_low-fd29952f.mp4) | grep -q efd4a1779a29da08c0186ed6121fc10bfa7e8e83
+    - echo $(sha1sum Lecture\ Recordings/Advanced\ Systems\ Lab/2020-03-19_360p-fd29952f.mp4) | grep -q cb80b301a9dec6e0196d97d8aea7e28f4a759d49
 
 # Test default named parameter file
 default-parameter-file:
@@ -61,11 +61,11 @@ default-parameter-file:
     # Install dependency
     - pip3 install requests
     # Add parameter file
-    - printf -- "--quality low\n--latest\n--hide-progress-bar\n--disable-hints\n" > parameters.txt
+    - printf -- "--quality lowest\n--latest\n--hide-progress-bar\n--disable-hints\n" > parameters.txt
     # Download video
     - python3 vo-scraper.py https://video.ethz.ch/lectures/d-infk/2020/spring/252-0028-00L.html
     # Compare checksums
-    - echo $(sha1sum Lecture\ Recordings/Digital\ Design\ and\ Computer\ Architecture/2020-03-12_low-3ebf562d.mp4) | grep -q f80bcc1c215cebf64a4da7f9623406fb1309e512
+    - echo $(sha1sum Lecture\ Recordings/Digital\ Design\ and\ Computer\ Architecture/2020-03-12_360p-3ebf562d.mp4) | grep -q f80bcc1c215cebf64a4da7f9623406fb1309e512
 
 # Test custom named parameter file
 custom-parameter-file:
@@ -75,8 +75,57 @@ custom-parameter-file:
     # Install dependency
     - pip3 install requests
     # Add parameter file
-    - printf -- "--quality low\n--latest\n--hide-progress-bar\n--disable-hints\n" > parameters2.txt
+    - printf -- "--quality lowest\n--latest\n--hide-progress-bar\n--disable-hints\n" > parameters2.txt
     # Download video
     - python3 vo-scraper.py --parameter-file parameters2.txt https://video.ethz.ch/lectures/d-infk/2020/spring/252-0028-00L.html
     # Compare checksums
-    - echo $(sha1sum Lecture\ Recordings/Digital\ Design\ and\ Computer\ Architecture/2020-03-12_low-3ebf562d.mp4) | grep -q f80bcc1c215cebf64a4da7f9623406fb1309e512
+    - echo $(sha1sum Lecture\ Recordings/Digital\ Design\ and\ Computer\ Architecture/2020-03-12_360p-3ebf562d.mp4) | grep -q f80bcc1c215cebf64a4da7f9623406fb1309e512
+
+# Download video in different resolutions
+# Lowest
+different-resolutions-lowest:
+  stage: feature-test
+  needs: [eth-protected-recording]
+  script:
+    # Install dependency
+    - pip3 install requests
+    # Download video
+    - python3 vo-scraper.py --disable-hints --hide-progress-bar --quality lowest --latest --file $ETH_RES_LINK_FILE
+    # Compare checksums
+    - echo $(sha1sum Lecture\ Recordings/Formal\ Methods\ and\ Functional\ Programming/2021-06-03_426p-aa6cf77e.mp4) | grep -q 4be43a94eab22fbb53c3df96f8d7f0e821986c7a
+
+# Highest
+different-resolutions-highest:
+  stage: feature-test
+  needs: [eth-protected-recording]
+  script:
+    # Install dependency
+    - pip3 install requests
+    # Download video
+    - python3 vo-scraper.py --disable-hints --hide-progress-bar --quality highest --latest --file $ETH_RES_LINK_FILE
+    # Compare checksums
+    - echo $(sha1sum Lecture\ Recordings/Formal\ Methods\ and\ Functional\ Programming/2021-06-03_2560p-aa6cf77e.mp4) | grep -q dd05cd87f654fcfb571cd1de12e69fdf27ef6610
+
+# 2K
+different-resolutions-2k:
+  stage: feature-test
+  needs: [eth-protected-recording]
+  script:
+    # Install dependency
+    - pip3 install requests
+    # Download video
+    - python3 vo-scraper.py --disable-hints --hide-progress-bar --quality 2K --latest --file $ETH_RES_LINK_FILE
+    # Compare checksums
+    - echo $(sha1sum Lecture\ Recordings/Formal\ Methods\ and\ Functional\ Programming/2021-06-03_1280p-aa6cf77e.mp4) | grep -q d9c3df18389f60ec9921c7dbf8ada1b19834a68d
+
+# Custom value
+different-resolutions-custom:
+  stage: feature-test
+  needs: [eth-protected-recording]
+  script:
+    # Install dependency
+    - pip3 install requests
+    # Download video
+    - python3 vo-scraper.py --disable-hints --hide-progress-bar --quality 1000p --latest --file $ETH_RES_LINK_FILE
+    # Compare checksums
+    - echo $(sha1sum Lecture\ Recordings/Formal\ Methods\ and\ Functional\ Programming/2021-06-03_852p-aa6cf77e.mp4) | grep -q f52cdfc462f2959c94a8ac86b0f16eef5fb8a4ff
