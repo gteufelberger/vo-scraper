@@ -467,7 +467,13 @@ def vo_scrapper(vo_link, video_quality, user, passw):
 
     # Get lecture metadata for episode list
     r = requests.get(vo_link + series_metadata_suffix, headers={'User-Agent': user_agent})
-    vo_json_data = json.loads(r.text)
+    # Try reading the received data as JSON.
+    # If it fails, e.g. due to no lectures having been uploaded yet, we skip this lecture
+    try:
+        vo_json_data = json.loads(r.text)
+    except json.decoder.JSONDecodeError:
+        print_information(f"Could not get metadata for {vo_link}.html, skipping", type='warning')
+        return list() # Return an empty list
 
     # Increase counter for stats
     link_counter += len(vo_json_data['episodes'])
