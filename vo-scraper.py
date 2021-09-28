@@ -465,6 +465,10 @@ def vo_scrapper(vo_link, video_quality, user, passw):
     # Remove `.html` file extension
     vo_link = vo_link.replace(".html", "")
 
+    # Remove `www.` prefix from domain name
+    # If in link used as a referer during the authentication it causes a failure
+    vo_link = vo_link.replace("www.", "")
+
     # Get lecture metadata for episode list
     r = requests.get(vo_link + series_metadata_suffix, headers={'User-Agent': user_agent})
     # Try reading the received data as JSON.
