@@ -55,7 +55,7 @@ gitlab_repo_page = "https://gitlab.ethz.ch/tgeorg/vo-scraper/"
 gitlab_issue_page = gitlab_repo_page + "issues"
 gitlab_changelog_page = gitlab_repo_page + "-/tags/v"
 remote_version_link = gitlab_repo_page + "raw/master/VERSION"
-program_version = '3.0.0'
+program_version = '3.0.1'
 
 # For web requests
 user_agent = 'Mozilla/5.0'
@@ -465,9 +465,19 @@ def vo_scrapper(vo_link, video_quality, user, passw):
     # Remove `.html` file extension
     vo_link = vo_link.replace(".html", "")
 
+    # Remove `www.` prefix from domain name
+    # If in link used as a referer during the authentication it causes a failure
+    vo_link = vo_link.replace("www.", "")
+
     # Get lecture metadata for episode list
     r = requests.get(vo_link + series_metadata_suffix, headers={'User-Agent': user_agent})
-    vo_json_data = json.loads(r.text)
+    # Try reading the received data as JSON.
+    # If it fails, e.g. due to no lectures having been uploaded yet, we skip this lecture
+    try:
+        vo_json_data = json.loads(r.text)
+    except json.decoder.JSONDecodeError:
+        print_information(f"Could not get metadata for {vo_link}.html, skipping", type='warning')
+        return list() # Return an empty list
 
     # Increase counter for stats
     link_counter += len(vo_json_data['episodes'])
