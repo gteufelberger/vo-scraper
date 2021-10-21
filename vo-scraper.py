@@ -962,6 +962,8 @@ if __name__ == '__main__':
         with open(PARAMETER_FILE) as f:
             # Read file and remove trailing whitespaces and newlines
             parameters = [x.strip() for x in f.readlines()]
+            # Remove comments i.e. lines starting with `#`
+            parameters = [line for line in parameters if not line.startswith('#')]
             # Split strings with spaces
             parameters = [words for segments in parameters for words in segments.split()]
             # Add parameters list
