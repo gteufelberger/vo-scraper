@@ -376,6 +376,18 @@ def get_user_choice(max_episode_number):
 
     return choice
 
+def resolution_from_input(resolution_input):
+    # Turn named resolution into number
+    if resolution_input.lower() == "4k":     resolution = "2160p"
+    if resolution_input.lower() == "2k":     resolution = "1440p"
+    if resolution_input.lower() == "hd":     resolution = "1080p"
+    if resolution_input.lower() == "high":   resolution = "1080p"
+    if resolution_input.lower() == "medium": resolution = "720p"
+    if resolution_input.lower() == "low":    resolution = "360p"
+
+    # Parse the given video resolution
+    return int(str(resolution).replace("p", ""))
+    
 
 def get_video_src_link_for_resolution(video_json_data, video_quality):
     """
@@ -406,16 +418,7 @@ def get_video_src_link_for_resolution(video_json_data, video_quality):
     elif video_quality == "highest":
         quality_index = 0
     else:
-        # Turn named resolution into number
-        if video_quality.lower() == "4k":     video_quality = "2160p"
-        if video_quality.lower() == "2k":     video_quality = "1440p"
-        if video_quality.lower() == "hd":     video_quality = "1080p"
-        if video_quality.lower() == "high":   video_quality = "1080p"
-        if video_quality.lower() == "medium": video_quality = "720p"
-        if video_quality.lower() == "low":    video_quality = "360p"
-
-        # Parse the given video resolution
-        video_quality_parsed = int(str(video_quality).replace("p", ""))
+        video_quality_parsed = resolution_from_input(video_quality)
 
         # Subtract requested from available resolutions to get the closest one
         list_of_quality_diff = [(x[0], abs(video_quality_parsed - x[2])) for x in resolutions]
