@@ -407,12 +407,12 @@ def get_video_src_link_for_resolution(video_json_data, video_quality):
         quality_index = 0
     else:
         # Turn named resolution into number
-        if video_quality.lower() == "4k":
-            video_quality = "2160p"
-        if video_quality.lower() == "2k":
-            video_quality = "1440p"
-        if video_quality.lower() == "hd":
-            video_quality = "1080p"
+        if video_quality.lower() == "4k":     video_quality = "2160p"
+        if video_quality.lower() == "2k":     video_quality = "1440p"
+        if video_quality.lower() == "hd":     video_quality = "1080p"
+        if video_quality.lower() == "high":   video_quality = "1080p"
+        if video_quality.lower() == "medium": video_quality = "720p"
+        if video_quality.lower() == "low":    video_quality = "360p"
 
         # Parse the given video resolution
         video_quality_parsed = int(str(video_quality).replace("p", ""))
