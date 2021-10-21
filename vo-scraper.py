@@ -376,14 +376,14 @@ def get_user_choice(max_episode_number):
 
     return choice
 
-def resolution_from_input(resolution_input):
+def resolution_from_input(resolution):
     # Turn named resolution into number
-    if resolution_input.lower() == "4k":     resolution = "2160p"
-    if resolution_input.lower() == "2k":     resolution = "1440p"
-    if resolution_input.lower() == "hd":     resolution = "1080p"
-    if resolution_input.lower() == "high":   resolution = "1080p"
-    if resolution_input.lower() == "medium": resolution = "720p"
-    if resolution_input.lower() == "low":    resolution = "360p"
+    if resolution.lower() == "4k":     resolution = "2160p"
+    if resolution.lower() == "2k":     resolution = "1440p"
+    if resolution.lower() == "hd":     resolution = "1080p"
+    if resolution.lower() == "high":   resolution = "1080p"
+    if resolution.lower() == "medium": resolution = "720p"
+    if resolution.lower() == "low":    resolution = "360p"
 
     # Parse the given video resolution
     return int(str(resolution).replace("p", ""))
