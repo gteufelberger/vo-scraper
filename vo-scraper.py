@@ -1010,6 +1010,10 @@ if __name__ == '__main__':
     else:
         print_information("Update check skipped.", verbose_only=True)
 
+    # Print selected quality
+    print_information(f"Selected quality for downloads: {resolution_from_input(video_quality)}p")
+    print_information("")
+
     # Run scraper for every link provided to get video sources for each episode
     for (link, user, password) in lecture_objects:
         print_information("Currently selected: " + link, verbose_only=True)
