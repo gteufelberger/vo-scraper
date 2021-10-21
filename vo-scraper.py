@@ -1011,7 +1011,11 @@ if __name__ == '__main__':
         print_information("Update check skipped.", verbose_only=True)
 
     # Print selected quality
-    print_information(f"Selected quality for downloads: {resolution_from_input(video_quality)}p")
+    if video_quality == "lowest" or video_quality == "highest":
+        quality_string = video_quality
+    else:
+        quality_string = str(resolution_from_input(video_quality)) + 'p'
+    print_information("Selected quality for downloads: " + quality_string)
     print_information("")
 
     # Run scraper for every link provided to get video sources for each episode
