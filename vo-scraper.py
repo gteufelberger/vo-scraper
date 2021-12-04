@@ -380,7 +380,9 @@ def resolution_from_input(resolution):
     # Turn named resolution into number
     if resolution.lower() == "4k":     resolution = "2160p"
     if resolution.lower() == "2k":     resolution = "1440p"
-    if resolution.lower() == "hd":     resolution = "1080p"
+    if resolution.lower() == "fullhd": resolution = "1080p"
+    if resolution.lower() == "hd":     resolution = "720p"
+    if resolution.lower() == "sd":     resolution = "480"
     if resolution.lower() == "high":   resolution = "1080p"
     if resolution.lower() == "medium": resolution = "720p"
     if resolution.lower() == "low":    resolution = "360p"
@@ -886,7 +888,7 @@ def setup_arg_parser():
     parser.add_argument(
         "-q", "--quality",
         default='HD',
-        help="Select a specific video resolution. Either specify a height directly like `1080p` or use the keywords `HD`, `2K`, and `4K`. The scraper will try to download the video closest to the specified resolution. Additionally you can also use `highest` and `lowest` to always download the highest or lowest quality respectively.",
+        help="Select a specific video resolution. Either specify a height directly like `1080p` or use the keywords `FullHD`, `2K`, and `4K`. The scraper will try to download the video closest to the specified resolution. Additionally you can also use `highest` and `lowest` to always download the highest or lowest quality respectively.",
     )
     parser.add_argument(
         "-sc", "--skip-connection-check",
