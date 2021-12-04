@@ -122,7 +122,7 @@ Example:
 
     https://video.ethz.ch/.episode-video.json?recordId=3f6dee77-396c-4e2e-a312-a41a457b319f
 
-This file contains links to all available video streams (usually 1080p, 720p, and 360p). Note that if a lecture requires a login, this file will only be accessible if you a cookie with a valid login-token!
+This file contains links to all available video streams (usually 1080p, 720p, and 360p). Note that if a lecture requires a login, this file will only be accessible if you have a cookie with a valid login-token!
 
 The link to the video stream looks something like this:
 
