@@ -193,7 +193,7 @@ In both cases we get back a cookie which we then can include when requesting the
 3. If the lecture is password protected, make sure you use the correct credentials. Most protected lectures require your NETHZ credentials while some use a custom username and password.
 4. Make sure you're running the newest version of the scraper by re-downloading the script from the repository. There might have been an update.
 5. Check whether other lectures still work. Maybe the site was updated which broke the scraper.
-6. Enable the debug flag with `-v` and see whether any of the additional information now provided is helpful.
+6. Enable the debug flag with `--verbose` and see whether any of the additional information now provided is helpful.
 7. Check "[How does it acquire the videos?](#how_it_works)" and see whether you can manually reach the video in your browser following the steps described there.
 8. After having tried all that without success, feel free to open up a new issue. Make sure to explain what you have tried and what the results were. There is no guarantee I will respond within reasonable time as I'm a busy student myself. If you can fix the issue yourself, feel free to open a merge request with the fix.
 
