@@ -201,6 +201,3 @@ In both cases we get back a cookie which we then can include when requesting the
 ### Q: Can you fix *X*? Can you implement feature *Y*?
 
 #### A: Feel free to open an issue [here](https://gitlab.ethz.ch/tgeorg/vo-scraper/issues). Merge requests are always welcome but subject to my own moderation.
-***
-
-Loosely based on https://gitlab.ethz.ch/dominik/infk-vorlesungsscraper
