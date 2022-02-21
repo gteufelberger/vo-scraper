@@ -55,7 +55,7 @@ gitlab_repo_page = "https://gitlab.ethz.ch/tgeorg/vo-scraper/"
 gitlab_issue_page = gitlab_repo_page + "issues"
 gitlab_changelog_page = gitlab_repo_page + "-/tags/v"
 remote_version_link = gitlab_repo_page + "raw/master/VERSION"
-program_version = '3.0.1'
+program_version = '3.1.0'
 
 # For web requests
 user_agent = 'Mozilla/5.0'
@@ -376,6 +376,20 @@ def get_user_choice(max_episode_number):
 
     return choice
 
+def resolution_from_input(resolution):
+    # Turn named resolution into number
+    if resolution.lower() == "4k":     resolution = "2160p"
+    if resolution.lower() == "2k":     resolution = "1440p"
+    if resolution.lower() == "fullhd": resolution = "1080p"
+    if resolution.lower() == "hd":     resolution = "720p"
+    if resolution.lower() == "sd":     resolution = "480"
+    if resolution.lower() == "high":   resolution = "1080p"
+    if resolution.lower() == "medium": resolution = "720p"
+    if resolution.lower() == "low":    resolution = "360p"
+
+    # Parse the given video resolution
+    return int(str(resolution).replace("p", ""))
+
 
 def get_video_src_link_for_resolution(video_json_data, video_quality):
     """
@@ -406,16 +420,7 @@ def get_video_src_link_for_resolution(video_json_data, video_quality):
     elif video_quality == "highest":
         quality_index = 0
     else:
-        # Turn named resolution into number
-        if video_quality.lower() == "4k":
-            video_quality = "2160p"
-        if video_quality.lower() == "2k":
-            video_quality = "1440p"
-        if video_quality.lower() == "hd":
-            video_quality = "1080p"
-
-        # Parse the given video resolution
-        video_quality_parsed = int(str(video_quality).replace("p", ""))
+        video_quality_parsed = resolution_from_input(video_quality)
 
         # Subtract requested from available resolutions to get the closest one
         list_of_quality_diff = [(x[0], abs(video_quality_parsed - x[2])) for x in resolutions]
@@ -549,7 +554,7 @@ def vo_scrapper(vo_link, video_quality, user, passw):
         video_json_data = json.loads(r.text)
 
         # Get video src url from json based on resolution
-        video_src_link, available_video_quality = get_video_src_link_for_resolution(video_json_data, video_quality)        
+        video_src_link, available_video_quality = get_video_src_link_for_resolution(video_json_data, video_quality)
 
         lecture_title = vo_json_data['title']
         episode_title = vo_json_data["episodes"][item_nr]["title"]
@@ -883,7 +888,7 @@ def setup_arg_parser():
     parser.add_argument(
         "-q", "--quality",
         default='HD',
-        help="Select a specific video resolution. Either specify a height directly like `1080p` or use the keywords `HD`, `2K`, and `4K`. The scraper will try to download the video closest to the specified resolution. Additionally you can also use `highest` and `lowest` to always download the highest or lowest quality respectively.",
+        help="Select a specific video resolution. Either specify a height directly like `1080p` or use the keywords `FullHD`, `2K`, and `4K`. The scraper will try to download the video closest to the specified resolution. Additionally you can also use `highest` and `lowest` to always download the highest or lowest quality respectively.",
     )
     parser.add_argument(
         "-sc", "--skip-connection-check",
@@ -962,6 +967,8 @@ if __name__ == '__main__':
         with open(PARAMETER_FILE) as f:
             # Read file and remove trailing whitespaces and newlines
             parameters = [x.strip() for x in f.readlines()]
+            # Remove comments i.e. lines starting with `#`
+            parameters = [line for line in parameters if not line.startswith('#')]
             # Split strings with spaces
             parameters = [words for segments in parameters for words in segments.split()]
             # Add parameters list
@@ -1004,6 +1011,14 @@ if __name__ == '__main__':
         check_update()
     else:
         print_information("Update check skipped.", verbose_only=True)
+
+    # Print selected quality
+    if video_quality == "lowest" or video_quality == "highest":
+        quality_string = video_quality
+    else:
+        quality_string = str(resolution_from_input(video_quality)) + 'p'
+    print_information("Selected quality for downloads: " + quality_string)
+    print_information("")
 
     # Run scraper for every link provided to get video sources for each episode
     for (link, user, password) in lecture_objects:

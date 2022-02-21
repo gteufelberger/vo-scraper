@@ -122,7 +122,7 @@ Example:
 
     https://video.ethz.ch/.episode-video.json?recordId=3f6dee77-396c-4e2e-a312-a41a457b319f
 
-This file contains links to all available video streams (usually 1080p, 720p, and 360p). Note that if a lecture requires a login, this file will only be accessible if you a cookie with a valid login-token!
+This file contains links to all available video streams (usually 1080p, 720p, and 360p). Note that if a lecture requires a login, this file will only be accessible if you have a cookie with a valid login-token!
 
 The link to the video stream looks something like this:
 
@@ -193,7 +193,7 @@ In both cases we get back a cookie which we then can include when requesting the
 3. If the lecture is password protected, make sure you use the correct credentials. Most protected lectures require your NETHZ credentials while some use a custom username and password.
 4. Make sure you're running the newest version of the scraper by re-downloading the script from the repository. There might have been an update.
 5. Check whether other lectures still work. Maybe the site was updated which broke the scraper.
-6. Enable the debug flag with `-v` and see whether any of the additional information now provided is helpful.
+6. Enable the debug flag with `--verbose` and see whether any of the additional information now provided is helpful.
 7. Check "[How does it acquire the videos?](#how_it_works)" and see whether you can manually reach the video in your browser following the steps described there.
 8. After having tried all that without success, feel free to open up a new issue. Make sure to explain what you have tried and what the results were. There is no guarantee I will respond within reasonable time as I'm a busy student myself. If you can fix the issue yourself, feel free to open a merge request with the fix.
 
@@ -201,6 +201,3 @@ In both cases we get back a cookie which we then can include when requesting the
 ### Q: Can you fix *X*? Can you implement feature *Y*?
 
 #### A: Feel free to open an issue [here](https://gitlab.ethz.ch/tgeorg/vo-scraper/issues). Merge requests are always welcome but subject to my own moderation.
-***
-
-Loosely based on https://gitlab.ethz.ch/dominik/infk-vorlesungsscraper
