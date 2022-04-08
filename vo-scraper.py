@@ -312,7 +312,7 @@ def pretty_print_episodes(vo_json_data, selected):
     for episode_nr in selected:
         episode = vo_json_data['episodes'][episode_nr]
         print_information(
-            "%3d".ljust(nr_length) % episode_nr
+            f"{episode_nr:3d}".ljust(nr_length)
             + " | " +
             episode['createdAt'][:10].ljust(max_date_length)
             + " | " +
@@ -547,7 +547,7 @@ def vo_scrapper(vo_link, video_quality, user, passw):
             # The lecture requires a login
             print_information("Received 401 response. The following lecture requires a valid login cookie:", type='error')
             item = vo_json_data['episodes'][item_nr]
-            print_information("%2d" % item_nr + " " + item['title'] + " " + str(item['createdBy']) + " " + item['createdAt'][:10], type='error')
+            print_information(f"{item_nr:2d} {item['title']} {str(item['createdBy'])} {item['createdAt'][:10]}", type='error')
             print_information("Make sure your token is valid. See README.md on how to acquire it.", type='error')
             print()
             continue
@@ -641,7 +641,7 @@ def downloader(file_name, video_src_link, episode_name):
                 response = requests.get(video_src_link, stream=True)
                 total_length = response.headers.get('content-length')
 
-                print_information("Downloading " + episode_name + " (%.2f" % (int(total_length) / 1024 / 1024) + " MiB)")
+                print_information(f"Downloading {episode_name} ({int(total_length) / 1024 / 1024:.2f} MiB)")
 
                 if total_length is None or HIDE_PROGRESS_BAR:
                     # We received no content length header...
@@ -656,7 +656,7 @@ def downloader(file_name, video_src_link, episode_name):
                         f.write(data)
                         progressbar_width = shutil.get_terminal_size().columns - 2
                         done = int(progressbar_width * dl / total_length)
-                        sys.stdout.write("\r[%s%s]" % ('=' * done, ' ' * (progressbar_width - done)))
+                        sys.stdout.write(f"\r[{'=' * done}{' ' * (progressbar_width - done)}]")
                         sys.stdout.flush()
             print()
 
