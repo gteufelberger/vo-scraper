@@ -20,7 +20,6 @@ import urllib.request
 import os
 import sys
 from urllib.request import Request, urlopen
-from sys import platform
 import json      # For handling json files
 import argparse  # For parsing commandline arguments
 import getpass   # For getting the user password
