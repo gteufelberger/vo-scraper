@@ -31,8 +31,8 @@ import webbrowser  # only used to open the user's browser when reporting a bug
 try:
     import requests
 except:
-    print_information("Required package `requests` is missing, try installing with `pip3 install requests`", type='error')
-    sys.exit(1)
+    print("(\033[91mERR\033[0m) Required package `requests` is missing, try installing with `pip3 install requests`")
+    sys.exit(-1)
 
 # ========================================================================
 #   ____   _           _               _
