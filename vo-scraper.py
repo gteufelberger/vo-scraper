@@ -643,14 +643,33 @@ def downloader(file_name, video_src_link, episode_name):
                 else:
                     # Download file and show progress bar
                     total_length = int(total_length)
-                    dl = 0
-                    for data in response.iter_content(chunk_size=4096):
-                        dl += len(data)
-                        f.write(data)
-                        progressbar_width = shutil.get_terminal_size().columns - 2
-                        done = int(progressbar_width * dl / total_length)
-                        sys.stdout.write(f"\r[{'=' * done}{' ' * (progressbar_width - done)}]")
-                        sys.stdout.flush()
+
+                    try:
+                        # Module with better progressbar
+                        from tqdm import tqdm
+
+                        # Setup progressbar
+                        pbar = tqdm(unit="B", unit_scale=True, unit_divisor=1024, total=total_length)
+                        pbar.clear()
+
+                        # Download to file and update progressbar
+                        for data in response.iter_content(chunk_size=4096):
+                            pbar.update(len(data))
+                            f.write(data)
+                        # Close it
+                        pbar.close()
+
+                    # If tqdm is not installed, fallback to self-made version
+                    except ModuleNotFoundError:
+                        print_information("Optionally dependency tqdm not installed, falling back to built-in progressbar", type='warning', verbose_only=True)
+                        dl = 0
+                        for data in response.iter_content(chunk_size=4096):
+                            dl += len(data)
+                            f.write(data)
+                            progressbar_width = shutil.get_terminal_size().columns - 2
+                            done = int(progressbar_width * dl / total_length)
+                            sys.stdout.write(f"\r[{'=' * done}{' ' * (progressbar_width - done)}]")
+                            sys.stdout.flush()
             print()
 
             # Remove `.part` suffix from file name
