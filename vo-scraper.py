@@ -82,6 +82,7 @@ file_to_print_src_to = ""
 history_file = ""
 PARAMETER_FILE = "parameters.txt"
 
+
 class bcolors:
     INFO = '\033[94m'
     ERROR = '\033[91m'
@@ -369,6 +370,7 @@ def get_user_choice(max_episode_number):
 
     return choice
 
+
 def resolution_from_input(resolution):
     # Turn named resolution into number
     if resolution.lower() == "4k":     resolution = "2160p"
@@ -419,7 +421,7 @@ def get_video_src_link_for_resolution(video_json_data, video_quality):
         list_of_quality_diff = [(x[0], abs(video_quality_parsed - x[2])) for x in resolutions]
 
         # Get the resolution closest to the requested one
-        min_value = min(list_of_quality_diff, key = lambda t: t[1])
+        min_value = min(list_of_quality_diff, key=lambda t: t[1])
         quality_index = min_value[0]
 
         # Show a warning if the we cannot return the requested resolution
@@ -427,7 +429,7 @@ def get_video_src_link_for_resolution(video_json_data, video_quality):
             print_information(f"Requested quality {video_quality} not available, downloading {video_json_data['streams'][0]['sources']['mp4'][quality_index]['res']['h']}p instead", type='warning')
 
     # Save actual quality of video for filename
-    video_quality = str(video_json_data['streams'][0]['sources']['mp4'][resolutions[quality_index][0]]['res']['h'])+'p'
+    video_quality = str(video_json_data['streams'][0]['sources']['mp4'][resolutions[quality_index][0]]['res']['h']) + 'p'
 
     video_src_link = video_json_data['streams'][0]['sources']['mp4'][resolutions[quality_index][0]]['src']
     return video_src_link, video_quality
@@ -475,7 +477,7 @@ def vo_scrapper(vo_link, video_quality, user, passw):
         vo_json_data = json.loads(r.text)
     except json.decoder.JSONDecodeError:
         print_information(f"Could not get metadata for {vo_link}.html, skipping", type='warning')
-        return list() # Return an empty list
+        return list()  # Return an empty list
 
     # Increase counter for stats
     link_counter += len(vo_json_data['episodes'])
