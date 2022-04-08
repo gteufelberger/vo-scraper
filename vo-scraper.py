@@ -642,8 +642,8 @@ def downloader(file_name, video_src_link, episode_name):
                     f.write(response.content)
                 else:
                     # Download file and show progress bar
-                    dl = 0
                     total_length = int(total_length)
+                    dl = 0
                     for data in response.iter_content(chunk_size=4096):
                         dl += len(data)
                         f.write(data)
