@@ -26,7 +26,7 @@ import argparse  # For parsing commandline arguments
 import getpass   # For getting the user password
 import random    # For selecting a random hint
 import shutil    # For getting terminal size
-
+import webbrowser  # only used to open the user's browser when reporting a bug
 
 # Check whether `requests` is installed
 try:
@@ -34,12 +34,6 @@ try:
 except:
     print_information("Required package `requests` is missing, try installing with `pip3 install requests`", type='error')
     sys.exit(1)
-
-# Check whether `webbrowser` is installed
-try:
-    import webbrowser  # only used to open the user's browser when reporting a bug
-except:
-    print_information("Failed to import `webbrowser`. It is however not required for downloading videos", type='warning')
 
 # ========================================================================
 #   ____   _           _               _
