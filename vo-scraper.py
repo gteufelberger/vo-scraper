@@ -20,26 +20,19 @@ import urllib.request
 import os
 import sys
 from urllib.request import Request, urlopen
-from sys import platform
 import json      # For handling json files
 import argparse  # For parsing commandline arguments
 import getpass   # For getting the user password
 import random    # For selecting a random hint
 import shutil    # For getting terminal size
-
+import webbrowser  # only used to open the user's browser when reporting a bug
 
 # Check whether `requests` is installed
 try:
     import requests
 except:
-    print_information("Required package `requests` is missing, try installing with `pip3 install requests`", type='error')
-    sys.exit(1)
-
-# Check whether `webbrowser` is installed
-try:
-    import webbrowser  # only used to open the user's browser when reporting a bug
-except:
-    print_information("Failed to import `webbrowser`. It is however not required for downloading videos", type='warning')
+    print("(\033[91mERR\033[0m) Required package `requests` is missing, try installing with `pip3 install requests`")
+    sys.exit(-1)
 
 # ========================================================================
 #   ____   _           _               _
@@ -55,7 +48,7 @@ gitlab_repo_page = "https://gitlab.ethz.ch/tgeorg/vo-scraper/"
 gitlab_issue_page = gitlab_repo_page + "issues"
 gitlab_changelog_page = gitlab_repo_page + "-/tags/v"
 remote_version_link = gitlab_repo_page + "raw/master/VERSION"
-program_version = '3.1.0'
+program_version = '3.2.0'
 
 # For web requests
 user_agent = 'Mozilla/5.0'
@@ -88,6 +81,7 @@ HIDE_PROGRESS_BAR = False
 file_to_print_src_to = ""
 history_file = ""
 PARAMETER_FILE = "parameters.txt"
+
 
 class bcolors:
     INFO = '\033[94m'
@@ -312,7 +306,7 @@ def pretty_print_episodes(vo_json_data, selected):
     for episode_nr in selected:
         episode = vo_json_data['episodes'][episode_nr]
         print_information(
-            "%3d".ljust(nr_length) % episode_nr
+            f"{episode_nr:3d}".ljust(nr_length)
             + " | " +
             episode['createdAt'][:10].ljust(max_date_length)
             + " | " +
@@ -376,6 +370,7 @@ def get_user_choice(max_episode_number):
 
     return choice
 
+
 def resolution_from_input(resolution):
     # Turn named resolution into number
     if resolution.lower() == "4k":     resolution = "2160p"
@@ -426,7 +421,7 @@ def get_video_src_link_for_resolution(video_json_data, video_quality):
         list_of_quality_diff = [(x[0], abs(video_quality_parsed - x[2])) for x in resolutions]
 
         # Get the resolution closest to the requested one
-        min_value = min(list_of_quality_diff, key = lambda t: t[1])
+        min_value = min(list_of_quality_diff, key=lambda t: t[1])
         quality_index = min_value[0]
 
         # Show a warning if the we cannot return the requested resolution
@@ -434,7 +429,7 @@ def get_video_src_link_for_resolution(video_json_data, video_quality):
             print_information(f"Requested quality {video_quality} not available, downloading {video_json_data['streams'][0]['sources']['mp4'][quality_index]['res']['h']}p instead", type='warning')
 
     # Save actual quality of video for filename
-    video_quality = str(video_json_data['streams'][0]['sources']['mp4'][resolutions[quality_index][0]]['res']['h'])+'p'
+    video_quality = str(video_json_data['streams'][0]['sources']['mp4'][resolutions[quality_index][0]]['res']['h']) + 'p'
 
     video_src_link = video_json_data['streams'][0]['sources']['mp4'][resolutions[quality_index][0]]['src']
     return video_src_link, video_quality
@@ -482,7 +477,7 @@ def vo_scrapper(vo_link, video_quality, user, passw):
         vo_json_data = json.loads(r.text)
     except json.decoder.JSONDecodeError:
         print_information(f"Could not get metadata for {vo_link}.html, skipping", type='warning')
-        return list() # Return an empty list
+        return list()  # Return an empty list
 
     # Increase counter for stats
     link_counter += len(vo_json_data['episodes'])
@@ -547,7 +542,7 @@ def vo_scrapper(vo_link, video_quality, user, passw):
             # The lecture requires a login
             print_information("Received 401 response. The following lecture requires a valid login cookie:", type='error')
             item = vo_json_data['episodes'][item_nr]
-            print_information("%2d" % item_nr + " " + item['title'] + " " + str(item['createdBy']) + " " + item['createdAt'][:10], type='error')
+            print_information(f"{item_nr:2d} {item['title']} {str(item['createdBy'])} {item['createdAt'][:10]}", type='error')
             print_information("Make sure your token is valid. See README.md on how to acquire it.", type='error')
             print()
             continue
@@ -641,7 +636,7 @@ def downloader(file_name, video_src_link, episode_name):
                 response = requests.get(video_src_link, stream=True)
                 total_length = response.headers.get('content-length')
 
-                print_information("Downloading " + episode_name + " (%.2f" % (int(total_length) / 1024 / 1024) + " MiB)")
+                print_information(f"Downloading {episode_name} ({int(total_length) / 1024 / 1024:.2f} MiB)")
 
                 if total_length is None or HIDE_PROGRESS_BAR:
                     # We received no content length header...
@@ -649,15 +644,34 @@ def downloader(file_name, video_src_link, episode_name):
                     f.write(response.content)
                 else:
                     # Download file and show progress bar
-                    dl = 0
                     total_length = int(total_length)
-                    for data in response.iter_content(chunk_size=4096):
-                        dl += len(data)
-                        f.write(data)
-                        progressbar_width = shutil.get_terminal_size().columns - 2
-                        done = int(progressbar_width * dl / total_length)
-                        sys.stdout.write("\r[%s%s]" % ('=' * done, ' ' * (progressbar_width - done)))
-                        sys.stdout.flush()
+
+                    try:
+                        # Module with better progressbar
+                        from tqdm import tqdm
+
+                        # Setup progressbar
+                        pbar = tqdm(unit="B", unit_scale=True, unit_divisor=1024, total=total_length)
+                        pbar.clear()
+
+                        # Download to file and update progressbar
+                        for data in response.iter_content(chunk_size=4096):
+                            pbar.update(len(data))
+                            f.write(data)
+                        # Close it
+                        pbar.close()
+
+                    # If tqdm is not installed, fallback to self-made version
+                    except ModuleNotFoundError:
+                        print_information("Optionally dependency tqdm not installed, falling back to built-in progressbar", type='warning', verbose_only=True)
+                        dl = 0
+                        for data in response.iter_content(chunk_size=4096):
+                            dl += len(data)
+                            f.write(data)
+                            progressbar_width = shutil.get_terminal_size().columns - 2
+                            done = int(progressbar_width * dl / total_length)
+                            sys.stdout.write(f"\r[{'=' * done}{' ' * (progressbar_width - done)}]")
+                            sys.stdout.flush()
             print()
 
             # Remove `.part` suffix from file name
