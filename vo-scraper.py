@@ -549,7 +549,12 @@ def vo_scrapper(vo_link, video_quality, user, passw):
         video_json_data = json.loads(r.text)
 
         # Get video src url from json based on resolution
-        video_src_link, available_video_quality = get_video_src_link_for_resolution(video_json_data, video_quality)
+        try:
+            video_src_link, available_video_quality = get_video_src_link_for_resolution(video_json_data, video_quality)
+        except IndexError:
+            # Audio only lectures error out, skip them
+            print_information(f"Couldn't get download link for recording {item_nr}. Skipping", type='warning')
+            continue
 
         lecture_title = vo_json_data['title']
         episode_title = vo_json_data["episodes"][item_nr]["title"]
