@@ -48,7 +48,7 @@ gitlab_repo_page = "https://gitlab.ethz.ch/tgeorg/vo-scraper/"
 gitlab_issue_page = gitlab_repo_page + "issues"
 gitlab_changelog_page = gitlab_repo_page + "-/tags/v"
 remote_version_link = gitlab_repo_page + "raw/master/VERSION"
-program_version = '3.2.0'
+program_version = '3.2.1'
 
 # For web requests
 user_agent = 'Mozilla/5.0'
@@ -549,7 +549,12 @@ def vo_scrapper(vo_link, video_quality, user, passw):
         video_json_data = json.loads(r.text)
 
         # Get video src url from json based on resolution
-        video_src_link, available_video_quality = get_video_src_link_for_resolution(video_json_data, video_quality)
+        try:
+            video_src_link, available_video_quality = get_video_src_link_for_resolution(video_json_data, video_quality)
+        except IndexError:
+            # Audio only lectures error out, skip them
+            print_information(f"Couldn't get download link for recording {item_nr}. Skipping", type='warning')
+            continue
 
         lecture_title = vo_json_data['title']
         episode_title = vo_json_data["episodes"][item_nr]["title"]
