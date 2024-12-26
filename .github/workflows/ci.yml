@@ -50,3 +50,19 @@ jobs:
           echo "$PWD_LINK_FILE" > pwd_link_file.txt
           python3 vo-scraper.py --disable-hints --hide-progress-bar --quality lowest --latest --file pwd_link_file.txt
           echo $(sha1sum Lecture\ Recordings/Introduction\ to\ Machine\ Learning/2020-05-27\ -\ Tutorial_360p-1898f0cc.mp4) | grep -q 1b5a1aff3053afd6e700c69d4075aa94aa1daef0
+
+  eth-protected-recording:
+    runs-on: ubuntu-latest
+    needs: python-compile-test
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Install dependencies
+        run: pip3 install requests
+      - name: Download NETHZ protected video
+        env:
+          ETH_LINK_FILE: ${{ secrets.ETH_LINK_FILE }}
+        run: |
+          echo "$ETH_LINK_FILE" > eth_link_file.txt
+          python3 vo-scraper.py --disable-hints --hide-progress-bar --quality lowest --latest --file eth_link_file.txt
+          echo $(sha1sum Lecture\ Recordings/Advanced\ Systems\ Lab/2020-03-19_360p-fd29952f.mp4) | grep -q cb80b301a9dec6e0196d97d8aea7e28f4a759d49
