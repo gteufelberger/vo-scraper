@@ -21,3 +21,16 @@ jobs:
         uses: actions/checkout@v4
       - name: Ensure Same Version
         run: grep -q $(sed -n "s/^.*program_version = '\(.*\)'$/\1/p" vo-scraper.py) VERSION
+
+  unprotected-recording:
+    runs-on: ubuntu-latest
+    needs: python-compile-test
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Install dependencies
+        run: pip3 install requests
+      - name: Download unprotected video
+        run: |
+          python3 vo-scraper.py --disable-hints --hide-progress-bar --quality lowest --latest https://video.ethz.ch/lectures/d-infk/2020/spring/252-0028-00L.html
+          echo $(sha1sum Lecture\ Recordings/Digital\ Design\ and\ Computer\ Architecture/2020-03-12_360p-3ebf562d.mp4) | grep -q f80bcc1c215cebf64a4da7f9623406fb1309e512
