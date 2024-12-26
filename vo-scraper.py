@@ -720,7 +720,7 @@ def report_bug():
 
 def version_tuple(version):
     """Takes a string and turns into an integer tuple, splitting on `.`"""
-    return tuple(map(int, (version.split('.'))))
+    return tuple(map(int, (version.replace("v", "").split('.'))))
 
 
 def check_update():
