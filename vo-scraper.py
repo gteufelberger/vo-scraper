@@ -44,11 +44,11 @@ except:
 # ========================================================================
 
 # Links to repo
-gitlab_repo_page = "https://gitlab.ethz.ch/tgeorg/vo-scraper/"
-gitlab_issue_page = gitlab_repo_page + "issues"
-gitlab_changelog_page = gitlab_repo_page + "-/tags/v"
-remote_version_link = gitlab_repo_page + "raw/master/VERSION"
-program_version = '3.2.1'
+github_repo_page = "https://github.com/gteufelberger/vo-scraper/"
+github_issue_page = github_repo_page + "issues"
+github_changelog_page = github_repo_page + "releases"
+remote_version_link = "https://api.github.com/repos/gteufelberger/vo-scraper/releases/latest"
+program_version = '4.0.0'
 
 # For web requests
 user_agent = 'Mozilla/5.0'
@@ -708,10 +708,10 @@ def check_connection():
 
 def report_bug():
     """Opens GitLab issue page in browser"""
-    print_information(gitlab_issue_page)
+    print_information(github_issue_page)
     try:
         input("Press enter to open the link in your browser or Ctrl+C to exit.")
-        webbrowser.open(gitlab_issue_page)
+        webbrowser.open(github_issue_page)
     except:
         print()
     print_information("Exiting...")
@@ -720,7 +720,7 @@ def report_bug():
 
 def version_tuple(version):
     """Takes a string and turns into an integer tuple, splitting on `.`"""
-    return tuple(map(int, (version.split('.'))))
+    return tuple(map(int, (version.replace("v", "").split('.'))))
 
 
 def check_update():
@@ -729,8 +729,8 @@ def check_update():
     """
     global program_version
     global remote_version_link
-    global gitlab_repo_page
-    global gitlab_changelog_page
+    global github_repo_page
+    global github_changelog_page
 
     print_information("Checking for update", verbose_only=True)
 
@@ -740,6 +740,8 @@ def check_update():
         remote_version_string = r.text
 
         if r.status_code == 200:  # Loading the version number succeeded
+            latest_release = r.json()
+            remote_version_string = latest_release["tag_name"]
 
             remote_version = version_tuple(remote_version_string)
             local_version = version_tuple(program_version)
@@ -748,8 +750,8 @@ def check_update():
                 # There's an update available, prompt the user
                 print_information("A new version of the VO-scraper is available: " + '.'.join(map(str, remote_version)), type='warning')
                 print_information("You have version: " + '.'.join(map(str, local_version)), type='warning')
-                print_information("You can download the new version from here: " + gitlab_repo_page, type='warning')
-                print_information("The changelog can be found here: " + gitlab_changelog_page + '.'.join(map(str, remote_version)), type='warning')
+                print_information("You can download the new version from here: " + github_repo_page, type='warning')
+                print_information("The changelog can be found here: " + github_changelog_page + "/" + remote_version_string, type='warning')
                 print_information("Press enter to continue with the current version", type='warning')
                 input()
             else:
