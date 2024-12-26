@@ -94,3 +94,38 @@ jobs:
           printf -- "--quality lowest\n--latest\n--hide-progress-bar\n--disable-hints\n" > parameters2.txt
           python3 vo-scraper.py --parameter-file parameters2.txt https://video.ethz.ch/lectures/d-infk/2020/spring/252-0028-00L.html
           echo $(sha1sum Lecture\ Recordings/Digital\ Design\ and\ Computer\ Architecture/2020-03-12_360p-3ebf562d.mp4) | grep -q f80bcc1c215cebf64a4da7f9623406fb1309e512
+
+  different-resolutions:
+    runs-on: ubuntu-latest
+    needs: eth-protected-recording
+    strategy:
+      matrix:
+        resolution: [lowest, highest, 2K, 1000p]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Install dependencies
+        run: pip3 install requests
+      - name: Download video in different resolutions
+        env:
+          ETH_RES_LINK_FILE: ${{ secrets.ETH_RES_LINK_FILE }}
+        run: |
+          echo "$ETH_RES_LINK_FILE" > eth_res_link_file.txt
+          case ${{ matrix.resolution }} in
+            lowest)
+              python3 vo-scraper.py --disable-hints --hide-progress-bar --quality lowest --latest --file eth_res_link_file.txt
+              echo $(sha1sum Lecture\ Recordings/Formal\ Methods\ and\ Functional\ Programming/2021-06-03_426p-aa6cf77e.mp4) | grep -q 4be43a94eab22fbb53c3df96f8d7f0e821986c7a
+              ;;
+            highest)
+              python3 vo-scraper.py --disable-hints --hide-progress-bar --quality highest --latest --file eth_res_link_file.txt
+              echo $(sha1sum Lecture\ Recordings/Formal\ Methods\ and\ Functional\ Programming/2021-06-03_2560p-aa6cf77e.mp4) | grep -q dd05cd87f654fcfb571cd1de12e69fdf27ef6610
+              ;;
+            2K)
+              python3 vo-scraper.py --disable-hints --hide-progress-bar --quality 2K --latest --file eth_res_link_file.txt
+              echo $(sha1sum Lecture\ Recordings/Formal\ Methods\ and\ Functional\ Programming/2021-06-03_1280p-aa6cf77e.mp4) | grep -q d9c3df18389f60ec9921c7dbf8ada1b19834a68d
+              ;;
+            1000p)
+              python3 vo-scraper.py --disable-hints --hide-progress-bar --quality 1000p --latest --file eth_res_link_file.txt
+              echo $(sha1sum Lecture\ Recordings/Formal\ Methods\ and\ Functional\ Programming/2021-06-03_852p-aa6cf77e.mp4) | grep -q f52cdfc462f2959c94a8ac86b0f16eef5fb8a4ff
+              ;;
+          esac
