@@ -66,3 +66,17 @@ jobs:
           echo "$ETH_LINK_FILE" > eth_link_file.txt
           python3 vo-scraper.py --disable-hints --hide-progress-bar --quality lowest --latest --file eth_link_file.txt
           echo $(sha1sum Lecture\ Recordings/Advanced\ Systems\ Lab/2020-03-19_360p-fd29952f.mp4) | grep -q cb80b301a9dec6e0196d97d8aea7e28f4a759d49
+
+  default-parameter-file:
+    runs-on: ubuntu-latest
+    needs: unprotected-recording
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Install dependencies
+        run: pip3 install requests
+      - name: Test default parameter pile
+        run: |
+          printf -- "--quality lowest\n--latest\n--hide-progress-bar\n--disable-hints\n" > parameters.txt
+          python3 vo-scraper.py https://video.ethz.ch/lectures/d-infk/2020/spring/252-0028-00L.html
+          echo $(sha1sum Lecture\ Recordings/Digital\ Design\ and\ Computer\ Architecture/2020-03-12_360p-3ebf562d.mp4) | grep -q f80bcc1c215cebf64a4da7f9623406fb1309e512
