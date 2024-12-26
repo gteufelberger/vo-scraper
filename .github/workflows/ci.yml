@@ -34,3 +34,19 @@ jobs:
         run: |
           python3 vo-scraper.py --disable-hints --hide-progress-bar --quality lowest --latest https://video.ethz.ch/lectures/d-infk/2020/spring/252-0028-00L.html
           echo $(sha1sum Lecture\ Recordings/Digital\ Design\ and\ Computer\ Architecture/2020-03-12_360p-3ebf562d.mp4) | grep -q f80bcc1c215cebf64a4da7f9623406fb1309e512
+
+  pwd-protected-recording:
+    runs-on: ubuntu-latest
+    needs: python-compile-test
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Install dependencies
+        run: pip3 install requests
+      - name: Download password protected video
+        env:
+          PWD_LINK_FILE: ${{ secrets.PWD_LINK_FILE }}
+        run: |
+          echo "$PWD_LINK_FILE" > pwd_link_file.txt
+          python3 vo-scraper.py --disable-hints --hide-progress-bar --quality lowest --latest --file pwd_link_file.txt
+          echo $(sha1sum Lecture\ Recordings/Introduction\ to\ Machine\ Learning/2020-05-27\ -\ Tutorial_360p-1898f0cc.mp4) | grep -q 1b5a1aff3053afd6e700c69d4075aa94aa1daef0
