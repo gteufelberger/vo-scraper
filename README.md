@@ -15,7 +15,7 @@ Install with:
     pip3 install requests tqdm
 
 ## Setup
-Download the file [here](https://gitlab.ethz.ch/tgeorg/vo-scraper/raw/master/vo-scraper.py?inline=false) and run with
+Download the file [here](https://github.com/gteufelberger/vo-scraper/releases/latest/download/vo-scraper.py) and run with
 
     python3 vo-scraper.py
 
