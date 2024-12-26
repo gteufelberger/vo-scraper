@@ -1,3 +1,7 @@
+:warning: vo-scraper has moved to GitHub. All future development happens via https://github.com/gteufelberger/vo-scraper :warning:
+
+Make sure to grab the newest version from there instead.
+
 # vo-scraper 🎓🎥
 
 A python script for ETH students to download lecture videos from [video.ethz.ch](https://video.ethz.ch/).
