@@ -48,7 +48,7 @@ github_repo_page = "https://github.com/gteufelberger/vo-scraper/"
 github_issue_page = github_repo_page + "issues"
 github_changelog_page = github_repo_page + "releases"
 remote_version_link = "https://api.github.com/repos/gteufelberger/vo-scraper/releases/latest"
-program_version = '3.2.1'
+program_version = '4.0.0'
 
 # For web requests
 user_agent = 'Mozilla/5.0'
