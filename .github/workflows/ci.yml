@@ -1,0 +1,14 @@
+name: vo-scraper ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  python-compile-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Python Compile Test
+        run: python3 -m py_compile vo-scraper.py
