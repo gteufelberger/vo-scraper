@@ -848,7 +848,7 @@ def report_bug():
     try:
         input("Press enter to open the link in your browser or Ctrl+C to exit.")
         webbrowser.open(github_issue_page)
-    except:
+    except KeyboardInterrupt:
         print()
     print_information("Exiting...")
     sys.exit(0)
