@@ -19,7 +19,7 @@ Check README.md and LICENSE before using this program.
 import urllib.request
 import os
 import sys
-from urllib.request import Request, urlopen
+from urllib.request import Request
 import json  # For handling json files
 import argparse  # For parsing commandline arguments
 import getpass  # For getting the user password
