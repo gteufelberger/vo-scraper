@@ -972,7 +972,7 @@ def apply_args(args):
     global HIDE_PROGRESS_BAR
 
     # Check if user wants to submit bug report and exit
-    if args.bug == True:
+    if args.bug:
         print_information("If you found a bug you can raise an issue here: ")
         report_bug()
 
