@@ -916,7 +916,7 @@ def check_update():
                 )
         else:
             raise Exception  # We couldn't get the file for some reason
-    except:
+    except Exception:
         # Update check failed
         print_information("Update check failed, skipping...", type="warning")
         # Note: We don't want the scraper to fail because it couldn't check for a new version so we continue regardless
