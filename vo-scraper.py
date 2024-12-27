@@ -30,7 +30,7 @@ import webbrowser  # only used to open the user's browser when reporting a bug
 # Check whether `requests` is installed
 try:
     import requests
-except:
+except ModuleNotFoundError:
     print(
         "(\033[91mERR\033[0m) Required package `requests` is missing, try installing with `pip3 install requests`"
     )
@@ -848,7 +848,7 @@ def report_bug():
     try:
         input("Press enter to open the link in your browser or Ctrl+C to exit.")
         webbrowser.open(github_issue_page)
-    except:
+    except KeyboardInterrupt:
         print()
     print_information("Exiting...")
     sys.exit(0)
