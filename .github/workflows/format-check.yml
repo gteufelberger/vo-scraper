@@ -1,0 +1,9 @@
+name: Format check
+on: [push, pull_request]
+
+jobs:
+  format-check:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: jpetrucciani/black-check@24.10.0
