@@ -1,0 +1,15 @@
+name: Ruff linter
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Ruff
+        run: |
+          pip install ruff
+
+      - name: Run Ruff
+        run: ruff check --output-format=github --ignore=E402 .
