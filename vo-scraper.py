@@ -659,13 +659,7 @@ def vo_scrapper(vo_link, video_quality, user, passw):
         # Filename is `directory/<video date (YYYY-MM-DD)><leftovers from video title>_<quality>-<pseudo_hash>.mp4`
         directory = directory_prefix + lecture_title + os.sep
         file_name = (
-            directory
-            + episode_title
-            + "_"
-            + available_video_quality
-            + "-"
-            + pseudo_hash
-            + ".mp4"
+            f"{directory}{episode_title}_{available_video_quality}-{pseudo_hash}.mp4"
         )
         print_information(file_name, verbose_only=True)
 
