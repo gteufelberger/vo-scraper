@@ -1219,7 +1219,7 @@ if __name__ == "__main__":
         quality_string = video_quality
     else:
         quality_string = str(resolution_from_input(video_quality)) + "p"
-    print_information("Selected quality for downloads: " + quality_string)
+    print_information(f"Selected quality for downloads: {quality_string}")
     print_information("")
 
     # Run scraper for every link provided to get video sources for each episode
@@ -1227,8 +1227,7 @@ if __name__ == "__main__":
         print_information("Currently selected: " + link, verbose_only=True)
         if "video.ethz.ch" not in link:
             print_information(
-                "Looks like the provided link does not go to 'videos.ethz.ch' and has therefore been skipped. Make sure that it is correct: "
-                + link,
+                f"Looks like the provided link does not go to 'videos.ethz.ch' and has therefore been skipped. Make sure that it is correct: {link}",
                 type="warning",
             )
 
@@ -1269,10 +1268,5 @@ if __name__ == "__main__":
 
     # Print summary and exit
     print_information(
-        str(link_counter)
-        + " files found, "
-        + str(download_counter)
-        + " downloaded and "
-        + str(skip_counter)
-        + " skipped"
+        f"{link_counter} files found, {download_counter} downloaded and {skip_counter} skipped"
     )
