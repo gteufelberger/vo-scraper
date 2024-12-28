@@ -46,16 +46,16 @@ except ModuleNotFoundError:
 # ========================================================================
 
 # Links to repo
-github_repo_page = "https://github.com/gteufelberger/vo-scraper/"
-github_issue_page = github_repo_page + "issues"
-github_changelog_page = github_repo_page + "releases"
-remote_version_link = (
+GITHUB_REPO_PAGE = "https://github.com/gteufelberger/vo-scraper/"
+GITHUB_ISSUE_PAGE = GITHUB_REPO_PAGE + "issues"
+GITHUB_CHANGELOG_PAGE = GITHUB_REPO_PAGE + "releases"
+REMOTE_VERSION_LINK = (
     "https://api.github.com/repos/gteufelberger/vo-scraper/releases/latest"
 )
-program_version = "4.0.0"
+PROGRAM_VERSION = "4.0.0"
 
 # For web requests
-user_agent = "Mozilla/5.0"
+USER_AGENT = "Mozilla/5.0"
 cookie_jar = requests.cookies.RequestsCookieJar()
 
 # Store video sources in global list
@@ -67,8 +67,8 @@ download_counter = 0
 skip_counter = 0
 
 #
-series_metadata_suffix = ".series-metadata.json"
-video_info_prefix = "https://video.ethz.ch/.episode-video.json?recordId="
+SERIES_METADATA_SUFFIX = ".series-metadata.json"
+VIDEO_INFO_PREFIX = "https://video.ethz.ch/.episode-video.json?recordId="
 directory_prefix = "Lecture Recordings" + os.sep
 
 # Default quality
@@ -229,7 +229,7 @@ def acquire_login_cookie(protection, vo_link, user, passw):
     Returns:
     Cookie jar containing the users valid authentication cookie
     """
-    global user_agent
+    global USER_AGENT
 
     # Setup cookie_jar
     cookie_jar = requests.cookies.RequestsCookieJar()
@@ -240,7 +240,7 @@ def acquire_login_cookie(protection, vo_link, user, passw):
             (user, passw) = get_credentials(user, passw)
 
             # Setup headers and content to send
-            headers = {"User-Agent": user_agent, "Referer": vo_link + ".html"}
+            headers = {"User-Agent": USER_AGENT, "Referer": vo_link + ".html"}
             data = {
                 "__charset__": "utf-8",
                 "j_validate": True,
@@ -276,7 +276,7 @@ def acquire_login_cookie(protection, vo_link, user, passw):
             (user, passw) = get_credentials(user, passw)
 
             # Setup headers and content to send
-            headers = {"Referer": vo_link + ".html", "User-Agent": user_agent}
+            headers = {"Referer": vo_link + ".html", "User-Agent": USER_AGENT}
             data = {"__charset__": "utf-8", "username": user, "password": passw}
 
             # Get login cookie
@@ -507,15 +507,15 @@ def vo_scrapper(vo_link, video_quality, user, passw):
     Returns:
     A tuple consisting out of the filename and the video_src_link
     """
-    global user_agent
+    global USER_AGENT
     global download_all
     global download_latest
 
     global quality_dict
     global cookie_jar
 
-    global series_metadata_suffix
-    global video_info_prefix
+    global SERIES_METADATA_SUFFIX
+    global VIDEO_INFO_PREFIX
     global directory_prefix
 
     global link_counter
@@ -529,7 +529,7 @@ def vo_scrapper(vo_link, video_quality, user, passw):
 
     # Get lecture metadata for episode list
     r = requests.get(
-        vo_link + series_metadata_suffix, headers={"User-Agent": user_agent}
+        vo_link + SERIES_METADATA_SUFFIX, headers={"User-Agent": USER_AGENT}
     )
     # Try reading the received data as JSON.
     # If it fails, e.g. due to no lectures having been uploaded yet, we skip this lecture
@@ -593,7 +593,7 @@ def vo_scrapper(vo_link, video_quality, user, passw):
     for item_nr in choice:
         # Get link to video metadata json file
         item = vo_json_data["episodes"][item_nr]
-        video_info_link = video_info_prefix + item["id"]
+        video_info_link = VIDEO_INFO_PREFIX + item["id"]
 
         # Print it for debbuging
         print_information(video_info_link, verbose_only=True)
@@ -602,10 +602,10 @@ def vo_scrapper(vo_link, video_quality, user, passw):
         # Use login-cookie if provided otherwise make request without cookie
         if cookie_jar:
             r = requests.get(
-                video_info_link, cookies=cookie_jar, headers={"User-Agent": user_agent}
+                video_info_link, cookies=cookie_jar, headers={"User-Agent": USER_AGENT}
             )
         else:
-            r = requests.get(video_info_link, headers={"User-Agent": user_agent})
+            r = requests.get(video_info_link, headers={"User-Agent": USER_AGENT})
         if r.status_code == 401:
             # The lecture requires a login
             print_information(
@@ -839,10 +839,10 @@ def check_connection():
 
 def report_bug():
     """Opens GitHub issue page in browser"""
-    print_information(github_issue_page)
+    print_information(GITHUB_ISSUE_PAGE)
     try:
         input("Press enter to open the link in your browser or Ctrl+C to exit.")
-        webbrowser.open(github_issue_page)
+        webbrowser.open(GITHUB_ISSUE_PAGE)
     except KeyboardInterrupt:
         print()
     print_information("Exiting...")
@@ -858,16 +858,16 @@ def check_update():
     """
     Checks for a new version of the scraper and prompts the user if a new version is available
     """
-    global program_version
-    global remote_version_link
-    global github_repo_page
-    global github_changelog_page
+    global PROGRAM_VERSION
+    global REMOTE_VERSION_LINK
+    global GITHUB_REPO_PAGE
+    global GITHUB_CHANGELOG_PAGE
 
     print_information("Checking for update", verbose_only=True)
 
     # try/except block to not crash the scraper just because it couldn't connect to server holding the version number
     try:
-        r = requests.get(remote_version_link)
+        r = requests.get(REMOTE_VERSION_LINK)
         remote_version_string = r.text
 
         if r.status_code == 200:  # Loading the version number succeeded
@@ -875,7 +875,7 @@ def check_update():
             remote_version_string = latest_release["tag_name"]
 
             remote_version = version_tuple(remote_version_string)
-            local_version = version_tuple(program_version)
+            local_version = version_tuple(PROGRAM_VERSION)
 
             if remote_version > local_version:
                 # There's an update available, prompt the user
@@ -888,11 +888,11 @@ def check_update():
                     type="warning",
                 )
                 print_information(
-                    f"You can download the new version from here: {github_repo_page}",
+                    f"You can download the new version from here: {GITHUB_REPO_PAGE}",
                     type="warning",
                 )
                 print_information(
-                    f"The changelog can be found here: {github_changelog_page}/{remote_version_string}",
+                    f"The changelog can be found here: {GITHUB_CHANGELOG_PAGE}/{remote_version_string}",
                     type="warning",
                 )
                 print_information(
@@ -1143,7 +1143,7 @@ if __name__ == "__main__":
 
     # Check for version flag
     if args.version:
-        print_information(program_version)
+        print_information(PROGRAM_VERSION)
         sys.exit()
 
     # If a parameter file was passed, use that instead of default
