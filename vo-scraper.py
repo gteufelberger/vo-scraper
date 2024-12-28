@@ -104,7 +104,7 @@ HINT_LIST = [
     # --help
     """Want to know more about the scrapers functionality?
 Run `python3 vo-scraper.py --help` to see all commands that can be used with the scraper.
-For a detailed explanation of some of the commands, check out the README here: https://gitlab.ethz.ch/tgeorg/vo-scraper""",
+For a detailed explanation of some of the commands, check out the README here: https://github.com/gteufelberger/vo-scraper/""",
     # --all
     """Want to download all recordings of a lecture at once?
 If you call the vo-scraper with `--all` it will skip the selection screen and will download all recordings instead.
@@ -113,7 +113,7 @@ Usage example:
     python3 vo-scraper.py --all https://video.ethz.ch/lectures/d-infk/2019/spring/252-0028-00L.html""",
     # --bug
     """Found a bug?
-Run `python3 vo-scraper.py --bug` or report it directly at https://gitlab.ethz.ch/tgeorg/vo-scraper/issues""",
+Run `python3 vo-scraper.py --bug` or report it directly at https://github.com/gteufelberger/vo-scraper/issues""",
     # --destination DESTINATION
     f"""Did you know? By default the vo-scraper saves the dowloaded recordings in \"{directory_prefix}<name of lecture>\"
 If you want the recordings saved in a different place you can use the parameter `--destination <your folder>`
@@ -300,7 +300,7 @@ def acquire_login_cookie(protection, vo_link, user, passw):
     else:
         print_information(f"Unknown protection type: {protection}", type="error")
         print_information(
-            "Please report this to the project's GitLab issue page!", type="error"
+            "Please report this to the project's GitHub issue page!", type="error"
         )
         report_bug()
 
@@ -838,7 +838,7 @@ def check_connection():
 
 
 def report_bug():
-    """Opens GitLab issue page in browser"""
+    """Opens GitHub issue page in browser"""
     print_information(github_issue_page)
     try:
         input("Press enter to open the link in your browser or Ctrl+C to exit.")
@@ -1018,7 +1018,7 @@ def setup_arg_parser():
         "-b",
         "--bug",
         action="store_true",
-        help="Print link to GitLab issue page and open it in browser.",
+        help="Print link to GitHub issue page and open it in browser.",
     )
     parser.add_argument(
         "-d",
