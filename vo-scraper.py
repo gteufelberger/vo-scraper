@@ -115,9 +115,7 @@ Usage example:
     """Found a bug?
 Run `python3 vo-scraper.py --bug` or report it directly at https://gitlab.ethz.ch/tgeorg/vo-scraper/issues""",
     # --destination DESTINATION
-    """Did you know? By default the vo-scraper saves the dowloaded recordings in \""""
-    + directory_prefix
-    + """<name of lecture>\"
+    f"""Did you know? By default the vo-scraper saves the dowloaded recordings in \"{directory_prefix}<name of lecture>\"
 If you want the recordings saved in a different place you can use the parameter `--destination <your folder>`
 For example:
 
@@ -150,10 +148,8 @@ For example:
 
 will create a file called 'history.txt' and save a history of all downloaded recordings there. If you delete a downloaded video the scraper will not redownload it as long as you pass `--history <filename> every time you run it.`""",
     # --parameter-file FILE
-    """Annoyed by having to type all those parameters like `--all`, `--history`, etc. by hand?
-You can create a text file called \""""
-    + PARAMETER_FILE
-    + """\" and paste all your parameters there. If it's in the same location as the scraper it will automatically read it and apply them.
+    f"""Annoyed by having to type all those parameters like `--all`, `--history`, etc. by hand?
+You can create a text file called \"{PARAMETER_FILE}\" and paste all your parameters there. If it's in the same location as the scraper it will automatically read it and apply them.
 
 If you want to use a different name for it, you can pass `--parameter-file <your filename>` to read parameters from `<your filename>` instead.
 Ironically this parameter cannot be put into the parameter file.""",
@@ -302,7 +298,7 @@ def acquire_login_cookie(protection, vo_link, user, passw):
                 )  # Reset passed credentials to not end up in loop if wrong credentials were passed
 
     else:
-        print_information("Unknown protection type: " + protection, type="error")
+        print_information(f"Unknown protection type: {protection}", type="error")
         print_information(
             "Please report this to the project's GitLab issue page!", type="error"
         )
@@ -697,7 +693,7 @@ def downloader(file_name, video_src_link, episode_name):
         # Print to file if given
         if file_to_print_src_to:
             print_information(
-                "Printing " + video_src_link + "to file: " + file_to_print_src_to,
+                f"Printing {video_src_link} to file: {file_to_print_src_to}",
                 verbose_only=True,
             )
             with open(file_to_print_src_to, "a") as f:
@@ -706,7 +702,7 @@ def downloader(file_name, video_src_link, episode_name):
             print_information(video_src_link)
     # Otherwise download video
     else:
-        print_information("Video source: " + video_src_link, verbose_only=True)
+        print_information(f"Video source: {video_src_link}", verbose_only=True)
 
         # Check history file (if one has been specified) whether episode has already been downloaded
         if history_file:
@@ -716,8 +712,7 @@ def downloader(file_name, video_src_link, episode_name):
                         line.rstrip("\n") for line in file.readlines()
                     ]:
                         print(
-                            "download skipped - file already recorded in history: "
-                            + episode_name
+                            f"download skipped - file already recorded in history: {episode_name}"
                         )
                         skip_counter += 1
                         return
@@ -728,7 +723,7 @@ def downloader(file_name, video_src_link, episode_name):
                         )
             except FileNotFoundError:
                 print_information(
-                    "No history file found at specified location: " + history_file,
+                    f"No history file found at specified location: {history_file}",
                     type="warning",
                     verbose_only=True,
                 )
@@ -738,16 +733,16 @@ def downloader(file_name, video_src_link, episode_name):
         if not os.path.isdir(directory):
             os.makedirs(directory)
             print_information(
-                "This folder was generated: " + directory, verbose_only=True
+                f"This folder was generated: {directory}", verbose_only=True
             )
         else:
             print_information(
-                "This folder already exists: " + directory, verbose_only=True
+                f"This folder already exists: {directory}", verbose_only=True
             )
 
         # Check if file already exists
         if os.path.isfile(file_name):
-            print_information("download skipped - file already exists: " + episode_name)
+            print_information(f"download skipped - file already exists: {episode_name}")
             skip_counter += 1
         # Otherwise download it
         else:
@@ -885,23 +880,19 @@ def check_update():
             if remote_version > local_version:
                 # There's an update available, prompt the user
                 print_information(
-                    "A new version of the VO-scraper is available: "
-                    + ".".join(map(str, remote_version)),
+                    f"A new version of the VO-scraper is available: {'.'.join(map(str, remote_version))}",
                     type="warning",
                 )
                 print_information(
-                    "You have version: " + ".".join(map(str, local_version)),
+                    f"You have version: {'.'.join(map(str, local_version))}",
                     type="warning",
                 )
                 print_information(
-                    "You can download the new version from here: " + github_repo_page,
+                    f"You can download the new version from here: {github_repo_page}",
                     type="warning",
                 )
                 print_information(
-                    "The changelog can be found here: "
-                    + github_changelog_page
-                    + "/"
-                    + remote_version_string,
+                    f"The changelog can be found here: {github_changelog_page}/{remote_version_string}",
                     type="warning",
                 )
                 print_information(
